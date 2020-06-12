@@ -1,0 +1,19 @@
+{
+  "name": "web-effect-favorites",
+  "version": "1.0.0",
+  "description": "网页特效收藏夹，收集各种牛逼的网页特效",
+  "main": "index.js",
+  "scripts": {
+    "dev": "anywhere"
+  },
+  "keywords": [
+    "网页特效",
+    "牛逼",
+    "高大上",
+    "炫酷"
+  ],
+  "author": "Orange",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {}
+}
