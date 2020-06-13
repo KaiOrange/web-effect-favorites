@@ -2,7 +2,18 @@
   "list": [
     {
       "title": "天空之云",
-      "img": "/web-effect-favorites/assets/images/cloud.png"
+      "img": "/web-effect-favorites/assets/images/cloud.png",
+      "link": "/web-effect-favorites/cloud/"
+    },
+    {
+      "title": "臆病な魔女",
+      "img": "/web-effect-favorites/assets/images/monv.png",
+      "link": "https://yui540.graphics/"
+    },
+    {
+      "title": "小飞机",
+      "img": "/web-effect-favorites/assets/images/feiji.png",
+      "link": "javascript:var%20KICKASSVERSION='2.0';var%20s%20=%20document.createElement('script');s.type='text/javascript';document.body.appendChild(s);s.src='//hi.kickassapp.com/kickass.js';void(0);"
     }
   ] 
 }
