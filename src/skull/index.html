@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://kai666666.top/images/apple-touch-icon-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://kai666666.top/images/favicon-32x32-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://kai666666.top/images/favicon-16x16-next.png?v=5.1.4">
+
+  <title>骷颅头</title>
+  <style>
+    #loading { 
+      background: #666; 
+      color: white; 
+      padding: 0.25em 1em; 
+      position: absolute; 
+      right:0px; 
+      top: 0px; 
+      z-index: 200; 
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" style="display: none;">Loading ...</div>
+
+  <script src="./js/xg.min.skull2.js"></script>
+  <script src="./js/stats.min.js"></script>
+
+  <script>
+    var loadingElement = document.getElementById( "loading" );
+    var hasWebGL1 = Detector.webgl;
+    var hasWebGL2 = Detector.webgl2;
+
+    if ( ! ( hasWebGL1 || hasWebGL2 ) ) {
+
+      loadingElement.style.display = "none";
+
+      Detector.addGetWebGLMessage( { fallbackImg: "./images/skull.jpg" } );
+
+    } else {
+
+    var useMRT = true;
+    var useDeferred = true;
+
+    var backend = hasWebGL2 ? "webgl2" : "webgl1";
+    var isMobile = Detector.isMobile;
+
+    // workaround for WebGL2 on Chrome not supporting samplers in loops with non-constant indices
+
+    backend = "webgl1";
+
+    //isMobile = true;
+
+    if ( ! Detector.deferredCapable || isMobile ) useDeferred = false;
+
+    // platform-specific compatibility fixes
+    // (mostly things that are supposed to work but are broken anyways)
+
+    var isChrome   = navigator.userAgent.toLowerCase().indexOf( "chrome" ) >= 0;
+    var isSafari   = navigator.userAgent.toLowerCase().indexOf( "safari" ) >= 0 && !isChrome;
+    var isFirefox  = navigator.userAgent.toLowerCase().indexOf( "firefox" ) >= 0;
+    var isExplorer = navigator.userAgent.toLowerCase().indexOf( "trident" ) >= 0 && ! Detector.isIpadOS;
+    var isOSX 	   = navigator.platform.toLowerCase().indexOf( "mac" ) >= 0;
+
+    var SCALE = 1;
+    var MARGIN = 0;
+
+    var SCALE_FORWARD = 1;
+
+    var BRIGHTNESS = isMobile ? 2.0 : 1.0;
+
+    var SCREEN_WIDTH = window.innerWidth;
+    var SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
+
+    //
+
+    var container, camera, scene, renderer;
+    var light;
+    var meshBottom;
+
+    var cluts = [];
+    var clutIndex = 0;
+
+    var effectFilm, effectColorCorrection, effectColor;
+
+    // ui
+
+    var loadingElement = document.getElementById( "loading" );
+    var loaded = 0;
+
+    var hudVisible = true;
+
+    // camera controls
+
+    var mouseX = 0;
+    var mouseY = 0;
+
+    var targetX = 0.0;
+    var targetY = 0.0;
+    var angle = 0.0;
+    var height = 0.0;
+    var target = new XG.Vector3();
+
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    //
+
+    var clock = new XG.Clock();
+
+    //
+
+    init();
+    animate();
+
+    function init() {
+
+      container = document.createElement( 'div' );
+      document.body.appendChild( container );
+
+      // camera
+
+      camera = new XG.PerspectiveCamera( 5, SCREEN_WIDTH / SCREEN_HEIGHT, 10, 3000 );
+      camera.position.set( 0, 0, 100 );
+
+      // scene
+
+      scene = new XG.Scene();
+      scene.add( camera );
+
+      // lights
+
+      light = new XG.SpotLight( 0xffffff, 0.75, 200, Math.PI / 4 );
+      light.position.set( 0, 50, 150 );
+      light.castShadow = true;
+      light.shadowMapWidth = 128;
+      light.shadowMapHeight = 128;
+      light.shadowDarkness = 0.99;
+
+      light.target.position.set( 0, 20, 0 );
+      scene.add( light );
+
+      //
+
+      light = new XG.SpotLight( 0xffffff, 0.55, 200, Math.PI / 3 );
+      light.position.set( 100, 100, 100 );
+      light.castShadow = true;
+      light.shadowMapWidth = 128;
+      light.shadowMapHeight = 128;
+      light.shadowDarkness = 0.99;
+
+      light.target.position.set( 0, 25, 0 );
+      scene.add( light );
+
+      //
+
+
+      light = new XG.SpotLight( 0xffffff, 0.25, 200, Math.PI / 3 );
+      light.position.set( -100, 100, 10 );
+      light.castShadow = true;
+      light.shadowMapWidth = 128;
+      light.shadowMapHeight = 128;
+      light.shadowDarkness = 0.99;
+
+      light.target.position.set( 0, 55, 0 );
+      scene.add( light );
+
+      //
+
+      light = new XG.SpotLight( 0xffffff, 0.35, 200, Math.PI / 3 );
+      light.position.set( 0, 50, 110 );
+      light.castShadow = true;
+      light.shadowMapWidth = 128;
+      light.shadowMapHeight = 128;
+      light.shadowDarkness = 0.99;
+
+      light.target.position.set( 0, 0, 0 );
+      scene.add( light );
+
+      // objects
+
+      var skyGeo = new XG.SphereGeometry( 1500, 32, 16 );
+
+      var skyMaterial = new XG.EmissiveMaterial( { "color": 0x334455, "specular": 0x111111, "shinines": 100, "side": XG.BackSide, "transparent": true } );
+      skyMaterial.occluder = true;
+
+      sky = new XG.Mesh( skyGeo, skyMaterial );
+      sky.position.y = -50;
+      scene.add( sky );
+
+      skyMaterial.color.setHSV( 0.61, 0.0, 0.05 );
+
+      //
+
+      var diffuseMap = XG.ImageUtils.loadTexture( "images/diffuse.jpg", checkLoaded );
+      var normalMap = XG.ImageUtils.loadTexture( "images/normal.jpg", checkLoaded );
+
+      diffuseMap.anisotropy = 8;
+      normalMap.anisotropy = 8;
+
+      var material = new XG.PhongMaterial( { color: 0xffffff, specular: 0x111111, shininess: 15 } );
+      material.map = diffuseMap;
+      material.normalMap = normalMap;
+      material.wrapAround = true;
+      material.wrapRGB.multiplyScalar( 0.75 );
+
+      var loader = new XG.CTMLoader();
+
+      var scale = 50;
+      var x = 0;
+      var y = 0;
+      var z = 0;
+
+      loader.load( "./models/craneo-top2.ctm", function ( geometry ) {
+
+        var modelMesh = new XG.Mesh( geometry, material );
+
+        modelMesh.scale.multiplyScalar( scale );
+        modelMesh.position.set( x, y, z );
+
+        modelMesh.castShadow = true;
+        modelMesh.receiveShadow = true;
+
+        scene.add( modelMesh );
+
+        checkLoaded();
+
+      } );
+
+      loader.load( "./models/craneo-bottom2.ctm", function ( geometry ) {
+
+        var modelMesh = new XG.Mesh( geometry, material );
+
+        modelMesh.scale.multiplyScalar( scale );
+        modelMesh.position.set( x, y, z );
+        modelMesh.rotation.x = 0.5;
+
+        modelMesh.castShadow = true;
+        modelMesh.receiveShadow = true;
+
+        scene.add( modelMesh );
+
+        meshBottom = modelMesh;
+
+        checkLoaded();
+
+      } );
+
+
+      // renderer
+
+      var pars = {
+
+        "width"		: SCREEN_WIDTH,
+        "height"	: SCREEN_HEIGHT,
+        "scale"		: SCALE,
+        "antialias"	: true,
+        "tonemapping": XG.Filmic2015Operator,
+        "brightness": BRIGHTNESS,
+        "clearColor": 0x050505,
+        "clearAlpha": 1.0,
+        "useMultipleRenderTargets": useMRT,
+        "dither"	: true,
+        "backend"	: backend
+
+      };
+
+      if ( useDeferred ) {
+
+        renderer = new XG.DeferredRenderer( pars );
+
+      } else {
+
+        pars.antialias = false;
+        renderer = new XG.ForwardRenderer( pars );
+
+      }
+
+      container.appendChild( renderer.domElement );
+
+      renderer.domElement.style.position = "absolute";
+      renderer.domElement.style.top = MARGIN + "px";
+      renderer.domElement.style.left = "0px";
+
+      //
+
+      renderer.shadowMapEnabled = true;
+
+      //renderer.shadowMapDebug = true;
+
+      //renderer.shadowMapCascade = true;
+      renderer.shadowMapType = XG.PCFSoftShadowMap;
+      //renderer.shadowMapType = XG.PCFSoftHQShadowMap;
+
+      renderer.shadowMapSlopeDepthBias = true;
+      renderer.shadowMapSlopeScale = 2;
+      renderer.shadowMapSlopeBias = 0.0;
+      renderer.shadowMapSlopeMax = 0.1;
+      //renderer.shadowMapCullFace = XG.CullFaceBack;
+      renderer.shadowMapCullFace = XG.CullFaceNone;
+
+      if ( ! isOSX && ! isMobile ) {
+
+        renderer.shadowMapUseDepthTextures = true;
+
+      } else {
+
+        renderer.shadowMapSlopeBias = 0.005;
+
+      }
+
+      effectFilm = new XG.ShaderPass( XG.SimpleFilmShader );
+      effectFilm.material.uniforms.intensity.value = 0.175;
+
+      clut1 = XG.ImageUtils.loadTexture( "./images/fuji_fp-3000b_negative_+.png" );
+      clut2 = XG.ImageUtils.loadTexture( "./images/fuji_superia_800_+.png" );
+
+      clut1.minFilter = clut1.magFilter = XG.NearestFilter;
+      clut1.flipY = false;
+
+      clut2.minFilter = clut2.magFilter = XG.NearestFilter;
+      clut2.flipY = false;
+
+      cluts.push( clut1 );
+      cluts.push( clut2 );
+
+      effectColorCorrection = new XG.ShaderPass( XG.CLUTShader );
+      effectColorCorrection.material.uniforms.tCLUT.value = clut1;
+
+      effectColor = new XG.ShaderPass( XG.ColorCorrectionShader );
+      //effectColor.material.uniforms.powRGB.value.set( 1.5, 1.25, 1 );
+      //effectColor.material.uniforms.powRGB.value.set( 1.25, 1.25, 1.5 );
+      effectColor.material.uniforms.powRGB.value.set( 0.85, 0.85, 0.85 );
+      //effectColor.material.uniforms.mulRGB.value.set( 1.25, 1.25, 1.25 );
+
+      if ( useDeferred ) {
+
+        //renderer.ssaoEnabled = true;
+
+        renderer.dofEnabled = true;
+        renderer.dofAutofocus = true;
+        renderer.dofFancy = true;
+        renderer.dofLensFstop = 1.7;
+        renderer.dofLensBlurScale = 3;
+
+        var fovRad = XG.Math.degToRad( camera.fov );
+        renderer.dofLensFocalLength = fov2flength( fovRad, 24 );
+
+        renderer.occludersEnabled = true;
+
+        //
+
+        renderer.addEffect( effectColorCorrection );
+        renderer.addEffect( effectColor );
+        renderer.addEffect( effectFilm );
+
+      } else {
+
+        var scaledWidth  = Math.floor( SCREEN_WIDTH  * SCALE_FORWARD );
+        var scaledHeight = Math.floor( SCREEN_HEIGHT * SCALE_FORWARD );
+
+        var renderScene = new XG.RenderPass( scene, camera );
+
+        effectCopy = new XG.ShaderPass( XG.CopyShader );
+        effectCopy.renderToScreen = true;
+
+        effectFXAA = new XG.ShaderPass( XG.FXAAShader );
+        effectFXAA.uniforms[ 'resolution' ].value.set( 1 / scaledWidth, 1 / scaledHeight );
+
+        composer = new XG.EffectComposer( renderer );
+        composer.setSize( scaledWidth, scaledHeight );
+
+        composer.addPass( renderScene );
+        composer.addPass( effectColorCorrection );
+        composer.addPass( effectColor );
+        composer.addPass( effectFXAA );
+        composer.addPass( effectCopy );
+
+      }
+
+      // stats
+
+      stats = new Stats();
+      container.appendChild( stats.domElement );
+
+      // events
+
+      window.addEventListener( 'resize', onWindowResize, false );
+      document.addEventListener( 'keydown', onKeyDown, false );
+      document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+      document.addEventListener( 'touchmove', onTouchMove, { passive: false } );
+      renderer.domElement.addEventListener( 'click', cycleClut, false );
+
+      //
+
+      onWindowResize();
+
+    }
+
+    //
+
+    function checkLoaded() {
+
+      loaded += 1;
+
+      if ( loaded >= 3 ) {
+
+        loadingElement.style.display = "none";
+
+      }
+
+    }
+
+    //
+
+    function fov2flength( verticalFov, frameHeight ) {
+
+      return 0.5 * frameHeight / Math.tan( 0.5 * verticalFov );
+
+    }
+
+    function toggleDOF() {
+
+      renderer.setDOF( ! renderer.dofEnabled );
+
+    }
+
+    function toggleColorEffect() {
+
+      effectColor.enabled = ! effectColor.enabled;
+
+    }
+
+    function toggleColorCorrection() {
+
+      effectColorCorrection.enabled = ! effectColorCorrection.enabled;
+
+    }
+
+    function toggleFilm() {
+
+      effectFilm.enabled = ! effectFilm.enabled;
+
+    }
+
+    function cycleClut() {
+
+      //if ( ! useDeferred ) return;
+
+      clutIndex = ( clutIndex + 1 ) % cluts.length;
+
+      var clut = cluts[ clutIndex ];
+      effectColorCorrection.material.uniforms.tCLUT.value = clut;
+
+    }
+
+    function toggleHUD() {
+
+      if ( hudVisible ) {
+
+        stats.domElement.style.display = "none";
+
+        hudVisible = false;
+
+      } else {
+
+        stats.domElement.style.display = "block";
+
+        hudVisible = true;
+
+      }
+
+    }
+
+    // event handlers
+
+    function onWindowResize ( event ) {
+
+      if ( isMobile ) {
+
+        if ( window.innerWidth > window.innerHeight ) {
+
+          // landscape
+
+          camera.fov = 5;
+
+        } else {
+
+          // portrait
+
+          camera.fov = 7;
+
+        }
+
+      }
+
+      SCREEN_WIDTH = window.innerWidth;
+      SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
+
+      renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+      camera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
+      camera.updateProjectionMatrix();
+
+      windowHalfX = window.innerWidth / 2;
+      windowHalfY = window.innerHeight / 2;
+
+      //
+
+      var scaledWidth  = Math.floor( SCREEN_WIDTH  * SCALE_FORWARD );
+      var scaledHeight = Math.floor( SCREEN_HEIGHT * SCALE_FORWARD );
+
+      if ( ! useDeferred ) {
+
+                  composer.setSize( scaledWidth, scaledHeight );
+                  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / scaledWidth, 1 / scaledHeight );
+
+      }
+
+    }
+
+    function onDocumentMouseMove ( event ) {
+
+      mouseX = ( event.clientX - windowHalfX ) * 1;
+      mouseY = ( event.clientY - windowHalfY ) * 1;
+
+    }
+
+    function onTouchMove( event ) {
+
+      event.preventDefault();
+
+      var touches = event.touches;
+      var touch = touches[ 0 ];
+
+      mouseX = ( touch.clientX - windowHalfX ) * 2;
+      mouseY = ( touch.clientY - windowHalfY ) * 2;
+
+    }
+
+    function onKeyDown ( event ) {
+
+      switch ( event.keyCode ) {
+
+        case 80: /*P*/	toggleDOF(); break;
+
+        case 49: /*1*/	toggleColorCorrection(); break;
+        case 50: /*2*/	toggleColorEffect(); break;
+        case 51: /*3*/	toggleFilm(); break;
+
+        case 74: /*J*/	toggleHUD(); break;
+
+        case 32: /*space*/	cycleClut(); break;
+
+      }
+
+    }
+
+    // updates
+
+    function animate() {
+
+      requestAnimationFrame( animate );
+      render();
+
+      stats.update();
+
+    }
+
+    function render() {
+
+      var delta = clock.getDelta();
+
+      // update camera
+
+      targetX = mouseX * 0.04;
+      targetY = mouseY * 0.04;
+
+      angle  += 0.05 * ( targetX - angle );
+      height += 0.05 * ( targetY - height );
+
+      var d = 1300;
+
+      var x =  -Math.sin( angle * 0.02 ) * d;
+      var z =   Math.cos( angle * 0.02 ) * d;
+      var y = 20.5 * height - 625;
+
+      camera.position.set( x, y, z );
+      camera.lookAt( target );
+
+      if ( effectFilm ) {
+
+        effectFilm.material.uniforms.time.value += 0.01;
+
+      }
+
+      if ( meshBottom ) {
+
+        meshBottom.rotation.x = ( Math.sin( clock.elapsedTime * 2 ) + 1 ) * ( Math.cos( clock.elapsedTime * 3 ) + 1 ) * 0.1;
+        meshBottom.position.x = Math.sin( clock.elapsedTime * 0.7 ) * 0.5;
+
+      }
+
+      // render scene
+
+      if ( useDeferred ) {
+
+        renderer.render( scene, camera );
+
+      } else {
+
+        composer.render();
+
+      }
+
+    }
+}
+  </script>
+</body>
+</html>
