@@ -39,6 +39,11 @@
       "title": "电弦",
       "img": "/web-effect-favorites/assets/images/electric-strings.png",
       "link": "/web-effect-favorites/electric-strings/"
+    },
+    {
+      "title": "环状闪电",
+      "img": "/web-effect-favorites/assets/images/ring-lightning.png",
+      "link": "/web-effect-favorites/ring-lightning/"
     }
   ] 
 }
