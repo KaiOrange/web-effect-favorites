@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>涂鸦反弹</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="https://kai666666.top/images/apple-touch-icon-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://kai666666.top/images/favicon-32x32-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://kai666666.top/images/favicon-16x16-next.png?v=5.1.4">
+  <style type="text/css">
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas></canvas>
+
+  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/3.1.0/rough.js"></script>
+  <script type="text/javascript" >
+    const canvas = document.querySelector('canvas');
+    const rc = rough.canvas(canvas);
+    const ctx = canvas.getContext('2d');
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    class Vector {
+      constructor(x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+      }
+      add(vec) {
+        this.x += vec.x;
+        this.y += vec.y;
+      }
+      multiply(vec) {
+        this.x *= vec.x;
+        this.y *= vec.y;
+      }
+      set(vec) {
+        this.x = vec.x;
+        this.y = vec.y;
+      }
+      getSum() {
+        return Math.abs(this.x) + Math.abs(this.y);
+      }
+    }
+
+    class Circle {
+      constructor() {
+        this.pos = new Vector(width / 2, height / 2);
+        this.vel = new Vector(90, -10);
+        this.r = 100;
+        this.strokeColor = 'white';
+        this.roughness = 3;
+        this.dampening = new Vector(0.6, 0.6);
+        this.grabbing = false;
+        this.grav = new Vector(0, 0.1);
+      }
+      update() {
+        if (!this.grabbing) {
+          this.vel.add(this.grav);
+          this.pos.add(this.vel);
+        }
+        this.checkBounds();
+        this.roughness > 0.2
+          ? (this.roughness = this.roughness * 0.93)
+          : (this.roughness = 0);
+        this.draw();
+      }
+      checkBounds() {
+        const maxPos = new Vector(width - this.r, height - this.r);
+        const minPos = new Vector(this.r, this.r);
+        if (this.pos.x > maxPos.x) {
+          this.vel.x = -this.vel.x;
+          this.pos.x = maxPos.x;
+          this.bounce();
+        }
+        if (this.pos.y > maxPos.y) {
+          this.vel.y = -this.vel.y;
+          this.pos.y = maxPos.y;
+          this.bounce();
+        }
+        if (this.pos.x < minPos.x) {
+          this.vel.x = -this.vel.x;
+          this.pos.x = minPos.x;
+          this.bounce();
+        }
+        if (this.pos.y < minPos.y) {
+          this.vel.y = -this.vel.y;
+          this.pos.y = minPos.y;
+          this.bounce();
+        }
+      }
+      bounce() {
+        this.roughness = this.vel.getSum() * 0.3;
+        this.vel.multiply(this.dampening);
+      }
+      draw() {
+        if (this.roughness > 0) {
+          rc.circle(this.pos.x, this.pos.y, this.r * 2, {
+            roughness: this.roughness,
+            strokeWidth: this.roughness > 1 ? this.roughness : 0,
+            stroke: this.strokeColor
+          });
+        } else {
+          ctx.strokeStyle = this.strokeColor;
+          ctx.beginPath();
+          ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    }
+
+    const circle = new Circle();
+
+    function update() {
+      ctx.fillRect(0, 0, width, height);
+      circle.update();
+
+      requestAnimationFrame(update);
+    }
+    update();
+
+    const mouse = {
+      movement: new Vector()
+    };
+
+    // LISTENERS
+
+    window.addEventListener('mousedown', e => {
+      circle.grabbing = true;
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (circle.grabbing) {
+        mouse.movement.set(new Vector(e.movementX, e.movementY));
+        circle.pos.add(mouse.movement);
+        circle.vel.multiply(new Vector(0, 0));
+      }
+    });
+
+    window.addEventListener('mouseup', e => {
+      circle.grabbing = false;
+      circle.vel.add(mouse.movement);
+    });
+
+    window.addEventListener('resize', e => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+  </script>
+  
+</body>
+</html>

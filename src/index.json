@@ -19,6 +19,26 @@
       "title": "骷颅头",
       "img": "/web-effect-favorites/assets/images/skull.png",
       "link": "/web-effect-favorites/skull/"
+    },
+    {
+      "title": "暴走方块",
+      "img": "/web-effect-favorites/assets/images/growth2.png",
+      "link": "/web-effect-favorites/growth2/"
+    },
+    {
+      "title": "博客背景点击心形效果",
+      "img": "/web-effect-favorites/assets/images/click-star.png",
+      "link": "/web-effect-favorites/click-star/"
+    },
+    {
+      "title": "涂鸦反弹",
+      "img": "/web-effect-favorites/assets/images/scribble-bounce.png",
+      "link": "/web-effect-favorites/scribble-bounce/"
+    },
+    {
+      "title": "电弦",
+      "img": "/web-effect-favorites/assets/images/electric-strings.png",
+      "link": "/web-effect-favorites/electric-strings/"
     }
   ] 
 }
