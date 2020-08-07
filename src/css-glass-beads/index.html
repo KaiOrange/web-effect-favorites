@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>纯CSS玻璃珠</title>
+  <style>
+    /* https://medium.com/@ConceptsApp/the-transparency-of-a-glass-sphere-a7ef59bb9bfe */
+    html, body {
+      margin: 0;
+      height: 100%;
+      background-color: rgb(148,147,143);
+    }
+
+    div {
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: 300px;
+      border-radius: 50% 50% 30% 30%;
+      /* border: 1px solid black; */
+      position: absolute;
+      transform: translate(-120%, 0%) rotateZ(45deg);
+      background-image: 
+        radial-gradient(
+          ellipse at top center,
+          rgba(255,255,255,1),
+          transparent 50%
+        );
+      background-size: 150px 300px;
+      background-position: 10px 0px;
+      background-repeat: no-repeat;
+      box-shadow:
+        -5px -60px 20px 5px rgba(0,0,0,0.4),
+        inset 0px 50px 20px -15px rgba(0,0,0,0.4);
+    }
+
+    div::before {
+      content: '';
+      top: -250px;
+      left: -130px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      /* border: 1px solid black; */
+      position: absolute;
+      transform: rotate(-45deg);
+      background-color: rgb(148,147,143);
+      background-image:
+        radial-gradient(
+          circle,
+          rgba(255,255,255,0.3),
+          rgba(255,255,255,0.1) 25%,
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(210, 210, 210, 0.7),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(210, 210, 210, 0.7),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.7),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.7),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.4),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.5),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.7),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,0.5),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(0,0,0,0.1),
+          transparent 60%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(0,0,0,0.2),
+          transparent 60%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(57, 57, 57, 0.5),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(57, 57, 57, 0.5),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(109, 109, 109, 0.1),
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse,
+          rgba(121, 121, 121, 0.2),
+          transparent 50%
+        );
+      background-size:
+        /* shine */
+        100px 100px,
+        /* light */
+        100px 100px,
+        100px 100px,
+        100px 100px,
+        100px 100px,
+        200px 200px,
+        200px 200px,
+        200px 200px,
+        200px 200px,
+        /* dark */
+        100px 100px,
+        120px 120px,
+        120px 120px,
+        120px 120px,
+        120px 120px,
+        120px 120px;
+      background-position: 
+        /* shine */
+        58% -5%,
+        /* light small */
+        -15% 90%,
+        -5% 100%,
+        5% 110%,
+        20% 120%,
+        /* light big */
+        -70% 170%,
+        -35% 210%,
+        -10% 215%,
+        80% 225%,
+        /* dark */
+        -35% 25%,
+        -10% -30%,
+        135% 15%,
+        80% -45%,
+        15% 40%,
+        75% 80%;
+      background-repeat: no-repeat;
+      box-shadow: 
+        inset -5px 5px 8px 0px rgba(0,0,0,0.15),
+        inset -30px 15px 20px -10px rgba(0,0,0,0.2),
+        inset -10px 10px 30px 5px rgba(0,0,0,0.2),
+        inset -10px 10px 10px -5px rgba(0,0,0,0.1),
+        inset 12px -20px 5px -21px rgba(255,255,255,0.8),
+        inset 10px -30px 20px -20px rgba(255,255,255,0.5),
+        inset 50px -50px 20px -10px rgba(108, 108, 108, 0.15);
+    }
+
+    div::after {
+      content: '';
+      top: -240px;
+      left: -40px;
+      width: 60px;
+      height: 80px;
+      border-radius: 40px 0 0 0 / 15px 0 0 0;
+      position: absolute;
+      /* border: 1px solid black; */
+      transform: perspective(100px) scaleY(0.5) rotateX(-5deg) rotateY(-15deg) rotateZ(25deg);
+      background-color: white;
+      background-image: 
+        linear-gradient(
+          to right,
+          transparent 20%,
+          rgba(255,255,255,0.5) 50%,
+          transparent 100%
+        ),
+        linear-gradient(
+          to top,
+          transparent 70%,
+          rgba(0,0,0,0.4) 80%,
+          rgba(0,0,0,0.4) 80%,
+          transparent 90%
+        );
+      filter: blur(.5px);
+    }
+
+
+    @media only screen and (max-width: 800px) {
+      div {
+        transform: scale(0.5) translate(-140%, 0%) rotateZ(45deg);
+      }
+    }
+  </style>  
+</head>
+<body>
+  <div></div>
+</body>
+</html>

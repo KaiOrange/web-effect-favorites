@@ -44,6 +44,42 @@
       "title": "环状闪电",
       "img": "/web-effect-favorites/assets/images/ring-lightning.png",
       "link": "/web-effect-favorites/ring-lightning/"
+    },
+    {
+      "title": "纯CSS咬唇",
+      "img": "/web-effect-favorites/assets/images/css-lip-bite.png",
+      "link": "/web-effect-favorites/css-lip-bite/"
+    },
+    {
+      "title": "纯CSS玻璃珠",
+      "img": "/web-effect-favorites/assets/images/css-glass-beads.png",
+      "link": "/web-effect-favorites/css-glass-beads/"
+    },
+    {
+      "title": "3D时钟",
+      "img": "/web-effect-favorites/assets/images/3D-clock.png",
+      "link": "/web-effect-favorites/3D-clock/"
+    },
+    {
+      "title": "粒子爆炸",
+      "img": "/web-effect-favorites/assets/images/particle-explosion.png",
+      "link": "/web-effect-favorites/particle-explosion/"
+    },
+    {
+      "title": "粒子追踪",
+      "img": "/web-effect-favorites/assets/images/particle-track.png",
+      "link": "/web-effect-favorites/particle-track/"
+    },
+    {
+      "title": "能量",
+      "img": "/web-effect-favorites/assets/images/energy.png",
+      "link": "/web-effect-favorites/energy/"
+    },
+    {
+      "title": "绿光小球",
+      "img": "/web-effect-favorites/assets/images/green-light-ball.png",
+      "link": "/web-effect-favorites/green-light-ball/"
     }
+    
   ] 
 }

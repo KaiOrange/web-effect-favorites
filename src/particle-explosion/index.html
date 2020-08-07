@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>粒子爆炸</title>
+  <style>
+    body, html {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    canvas{
+        position:absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000;
+        cursor: pointer;
+    }
+  </style>  
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script tyep="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+  <script type="text/javascript">
+  var gui = new dat.GUI();
+
+  const canvas = document.querySelector("#canvas");
+  canvas.width = document.body.clientWidth;
+  canvas.height = document.body.clientHeight;
+
+  const ctx = canvas.getContext("2d");
+  var w = 0;
+  var h = 0;
+
+  var cells = [];
+  var cellsExplored = [];
+  var numParticles = 0;
+
+  var clicked = false;
+  var inGame = false;
+  var reset = false;
+
+  function isMobileDevice() {
+    // This function checks if window.orientation exists, because usually desktop computers and laptops didn't have it usually.
+    // from: https://coderwall.com/p/i817wa/one-line-function-to-detect-mobile-devices-with-javascript
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+  };
+  const mobileDevice = isMobileDevice();
+
+  var settings = {
+    minSize: 2,
+    maxSize: 6,
+    maxSpeed: 2,
+    
+    particleCount: 0,
+    maxParticleCount: 2000,
+
+    maxSizeExp: 20,
+    stepExplosion: 3,
+    firstExplosionDegree: 10,
+    
+    minColor: 0,
+    maxColor: 255,
+    
+    composite: 'lighter',
+    restart: () => {
+      reset = true;
+      inGame = false;
+      init();
+    }
+  };
+
+  function rand(max, min) {
+    return (Math.random() * (max - min)) + min;
+  }
+
+  function getRandomColor(min) {
+    return {
+      r: rand(255, min),
+      g: rand(255, min),
+      b: rand(255, min)
+    }
+  }
+
+  function generateParticleImage(w, h, r, g, b, a) {
+    let tempCanvas = document.createElement("canvas");
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+
+    let imgCtx = tempCanvas.getContext("2d");
+    let gradient = imgCtx.createRadialGradient( w / 2, h / 2, 0, w / 2, h / 2, w / 2 );
+
+    gradient.addColorStop( 0, 'rgba(' + [r, g, b, a] + ')' );
+    gradient.addColorStop( 0.1, 'rgba(' + [r, g, b, a * .5] + ')' );
+    gradient.addColorStop( 0.2, 'rgba(' + [r, g, b, a * .25] + ')' );
+    gradient.addColorStop( 1, 'rgba(' + [r, g, b, 0] + ')' );
+
+    imgCtx.fillStyle = gradient;
+    imgCtx.fillRect(0, 0, w, h);
+
+    return tempCanvas;
+  }
+
+  function generateFireBallImage(w, h, r, g, b, a) {
+    let tempCanvas = document.createElement("canvas");
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+
+    var imgCtx = tempCanvas.getContext("2d");
+    var gradient = imgCtx.createRadialGradient( w / 2, h / 2, 0, w / 2, h / 2, w / 2 );
+
+    function applyMask(value, mask) {
+      value = (value * mask / 255);
+      return value < 256 ? value : 255;
+    }
+
+    gradient.addColorStop(0.00, 'rgba(' + [applyMask(r, 255), applyMask(g, 255), applyMask(b, 255), a * 1.00] + ')');
+    gradient.addColorStop(0.30, 'rgba(' + [applyMask(r, 254), applyMask(g, 239), applyMask(b,  29), a * 1.00] + ')');
+    gradient.addColorStop(0.40, 'rgba(' + [applyMask(r, 254), applyMask(g,  88), applyMask(b,  29), a * 1.00] + ')');
+    gradient.addColorStop(0.60, 'rgba(' + [applyMask(r, 239), applyMask(g,  27), applyMask(b,  51), a * 0.05] + ')');
+    gradient.addColorStop(0.88, 'rgba(' + [applyMask(r, 153), applyMask(g,  10), applyMask(b,  27), a * 0.05] + ')');
+    gradient.addColorStop(0.92, 'rgba(' + [applyMask(r, 254), applyMask(g,  39), applyMask(b,  17), a * 0.10] + ')');
+    gradient.addColorStop(0.98, 'rgba(' + [applyMask(r, 254), applyMask(g, 254), applyMask(b, 183), a * 0.20] + ')');
+    gradient.addColorStop(1.00, 'rgba(' + [applyMask(r, 254), applyMask(g,  39), applyMask(b,  17), a * 0.00] + ')');
+
+    imgCtx.fillStyle = gradient;
+    imgCtx.fillRect(0, 0, w, h);
+
+    return tempCanvas;
+  }
+
+  function checkExplosion(CellA, CellB) {
+    if(CellB.exploded)
+        return;
+  
+    let distX = CellA.x - CellB.x;
+    let distY = CellA.y - CellB.y;
+    let dist = Math.sqrt((distX ** 2) + (distY ** 2)) - (CellB.size / 2);
+    
+    if(dist <= CellA.explosionSize) {
+      CellB.explode();
+    }
+  }
+
+  class Cell {
+    constructor (size, x, y) {
+      this.color = getRandomColor(settings.minColor);
+      
+      this.img = generateParticleImage(64, 64, this.color.r, this.color.g, this.color.b, 1);
+      this.expImg = generateFireBallImage(64, 64, 255, this.color.g, this.color.b, 1);
+
+      let maxSize = Math.max(settings.maxSize, settings.minSize);
+      let minSize = Math.min(settings.minSize, settings.maxSize);
+
+      this.size = size || rand(maxSize, minSize);
+      this.initSize = this.size;
+      
+      this.x = x || rand(w, 0);
+      this.y = y || rand(h, 0);
+      
+      this.vx = rand(settings.maxSpeed * 2, 0) - settings.maxSpeed;
+      this.vy = rand(settings.maxSpeed * 2, 0) - settings.maxSpeed;
+      
+      this.exploded = false;
+      this.explosionSize = settings.maxSizeExp / 5;
+      this.expV = settings.stepExplosion;
+    }
+
+    update() {
+        let s = this.size * 2;
+
+        if(!this.exploded) {
+          ctx.moveTo(this.x, this.y);
+        }
+
+        this.x += this.vx * rand(rand(5, 0), 0);
+        this.y += this.vy * rand(rand(5, 0), 0);
+
+        if(this.x < 0 || this.x > w) {
+          this.vx *= -1;
+          this.x = this.x > 0 ? w : 0;
+        }
+        if(this.y < 0 || this.y > h) {
+          this.vy *= -1;
+          this.y = this.y > 0 ? h : 0;
+        }
+
+        if(this.exploded) {
+          this.explosionSize += this.expV / this.explosionSize * 10;
+
+          if(this.explosionSize >= 0) {
+            if (this.size > 0) {
+              this.size -= 0.05;
+            }
+
+            if(this.explosionSize > settings.maxSizeExp * 2) {
+              this.expV *= -1;
+            }
+
+            s = this.explosionSize * (this.now && this.now-- ? 2 : 1 * ((settings.firstExplosionDegree - (this.now || 0))) || 1);
+
+            if(this.now === undefined) {
+              cells.splice(cells.indexOf(this), 1);
+              cellsExplored.push(this);
+            }
+
+            this.now = this.now || settings.firstExplosionDegree;
+
+            ctx.drawImage(this.expImg, this.x - (s / 2), this.y - (s / 2), s, s);
+
+            for(let i = cells.length - 1; i >= 0; i--)
+            {
+              checkExplosion(this, cells[i]);
+            }
+          }
+          else {
+            cellsExplored.splice(cellsExplored.indexOf(this), 1);
+          }
+        }
+        else {
+          ctx.lineTo(this.x, this.y);
+          ctx.drawImage(this.img, this.x - (s / 2), this.y - (s / 2), s, s);
+        }
+    }
+
+    explode() {
+      this.exploded = true;
+    }
+  }
+
+  function click(e) {
+    e.preventDefault();
+    
+    if(!inGame) {
+      init();
+    }
+    else if(clicked) {
+      reset = true;
+    }
+    else {
+      gui.close();
+      
+      e = e.touches && e.touches.length ? e.touches[0] : e;
+      
+      let cell = new Cell(settings.maxSize, e.pageX, e.pageY);
+      cells.push(cell);
+      
+      cell.explode();
+      
+      clicked = true;
+    }
+  }
+
+  canvas.addEventListener('click', click, false);
+  canvas.addEventListener('touchstart', click, false);
+
+  window.addEventListener('resize', () => {
+    reset = true;
+    inGame = false;
+    settings.particleCount = 0;
+    init();
+  });
+
+  function gameOver() {
+    inGame = false;
+    
+    if(!mobileDevice)
+        gui.open();
+    
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function anim() {
+    if(reset && !inGame) {
+        reset = false;
+        return init();
+    }
+
+    ctx.save();
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0, 0, 0, .2)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = settings.composite;
+
+    ctx.fillStyle = "none";
+    ctx.strokeStyle = '#fff';
+    ctx.beginPath();
+
+    cells.forEach(cell => cell.update());
+    cellsExplored.forEach(cell => cell.update());
+
+    ctx.stroke();
+    ctx.restore();
+
+    let title = "";
+    if(!clicked)
+        title = "Click to let " + numParticles + " particles explode...";
+    
+    if(clicked && !cellsExplored.length) {
+        title = "Click to restart...";
+        gameOver();
+    }
+
+    ctx.fillStyle = 'white';
+    ctx.font = "16pt Arial";
+    let textMetrics = ctx.measureText(title);
+    let textWidth = Math.max(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft, textMetrics.width);
+    let textHeight = (textMetrics.actualBoundingBoxAscent - textMetrics.actualBoundingBoxDescent) * 2;
+    
+    let textPosX = (w / 2) - (textWidth / 2);
+    let textPosY = 20 + textHeight;
+    
+    if(clicked && !cellsExplored.length)
+        textPosY = (h / 2) - (textHeight / 2);
+    
+    if(title.length > 0)
+        ctx.fillText(title, textPosX, textPosY, w);
+
+    if(inGame) {
+        window.requestAnimationFrame(anim);
+    }
+  }
+
+  function initGUI() {
+    var f = gui.addFolder('Particles');
+    f.add(settings, 'particleCount', 500, settings.maxParticleCount).step(1).listen();
+    f.add(settings, 'minSize', 1, 10).step(1).listen();
+    f.add(settings, 'maxSize', 1, 10).step(1).listen();
+    f.add(settings, 'maxSpeed', 0, 10).listen();
+    f.open();
+
+    f = gui.addFolder('Explosion');
+    f.add(settings, 'maxSizeExp', 1, 100).step(1).listen();
+    f.add(settings, 'stepExplosion', 1, 10).listen();
+    f.add(settings, 'firstExplosionDegree', 2, 100).step(1).listen();
+    f.open();
+
+    f = gui.addFolder('Colors');
+    f.add(settings, 'minColor', 0, 255).step(1).listen();
+    f.add(settings, 'maxColor', 0, 255).step(1).listen();
+    f.open();
+
+    //f.add(settings, 'composite', [
+    //    'source-over', 'source-in', 'source-out', 'source-atop',
+    //    'destination-over', 'destination-in', 'destination-out', 'destination-atop',
+    //    'lighter', 'darker', 'copy', 'xor'
+    //]).listen();
+        
+    f = gui.addFolder('Please click restart to apply changes!');
+    f.add(settings, 'restart');
+    f.open();
+    
+    if(mobileDevice)
+        gui.close();
+  };
+  initGUI();
+
+  function init() {
+    w = document.body.clientWidth;
+    h = document.body.clientHeight;
+
+    canvas.width = w;
+    canvas.height = h;
+    
+    if(settings.particleCount === 0)
+        settings.particleCount = Math.min(Math.floor((w * h) / 500), settings.maxParticleCount);
+    
+    numParticles = settings.particleCount;
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, w, h);
+
+    cells.splice(0);
+    cellsExplored.splice(0);
+
+    for(let i = 0; i < numParticles; i++) {
+        cells.push(new Cell);
+    };
+
+    reset = false;
+    clicked = false;
+    inGame = true;
+
+    anim();
+  }
+  init();
+
+  </script>
+</body>
+</html>

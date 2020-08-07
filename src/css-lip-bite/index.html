@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>纯CSS咬唇</title>
+  <style>
+    :root {
+      --main-lip-color: #8e0e0e;
+      --main-teeth-color: #bbbbbb;
+      --main-background-color: #f7a4ac;
+    }
+
+    body{
+      background-color: var(--main-background-color);
+    }
+
+    .box {
+      width: 80vh;
+      height: 80vh;
+      margin: auto;
+      position: relative;
+      display: block;
+    }
+
+    .circle-group-pos {
+      position: absolute;
+      top: 30%;
+      left: 40%;
+    }
+
+    .circle-left {
+        height: 50px;
+        width: 50px;
+        background-color: var(--main-lip-color);
+        border-radius: 50%;
+        position: absolute;
+        top: 15px;
+    }
+
+    .circle-right {
+      height: 50px;
+      width: 50px;
+      background-color: var(--main-lip-color);
+      border-radius: 50%;
+      position: absolute;
+      left: 45px;
+      top: 18px;
+    }
+
+    .triangle-left {
+      width: 0;
+      height: 0;
+      border-top: 60px solid transparent;
+      border-right: 92px solid var(--main-lip-color);
+      border-bottom: 60px solid transparent;
+      position: absolute;
+      right: 31px;
+    }
+
+    .triangle-right {
+      width: 0;
+      height: 0;
+      border-top: 100px solid transparent;
+      border-left: 54px solid var(--main-lip-color);
+      border-bottom: 40px solid transparent;
+      position: absolute;
+      left: 44px;
+      top: 8px;
+    }
+
+    .triangle-down {
+      width: 0;
+      height: 0;
+      border-left: 195px solid transparent;
+      border-right: 38px solid transparent;
+      border-top: 61px solid var(--main-lip-color);
+      position: absolute;
+      top: 87px;
+      left: -88px;
+      transform: rotate(14deg);
+    }
+
+    .oval-t-down-edge {
+      height: 30px;
+      width: 205px;
+      background-color: var(--main-lip-color);
+      border-radius: 50%;
+      position: absolute;
+      top: 99px;
+      transform: rotate(30deg);
+      left: -95px;
+    }
+
+    .oval-t-right-bottom-edge {
+      height: 30px;
+      width: 75px;
+      background-color: var(--main-lip-color);
+      border-radius: 50%;
+      position: absolute;
+      left: 33px;
+      transform: rotate(-30deg);
+      top: 111px;
+      z-index: 1;
+    }
+
+    .oval-t-right-top-edge {
+      height: 30px;
+      width: 125px;
+      background-color: var(--main-lip-color);
+      border-radius: 50%;
+      position: absolute;
+      left: 3px;
+      transform: rotate(55deg);
+      top: 39px;
+    }
+
+    .oval-t-left-edge {
+      height: 30px;
+      width: 119px;
+      background-color: var(--main-lip-color);
+      border-radius: 50%;
+      position: absolute;
+      right: 17px;
+      top: 13px;
+      transform: rotate(-23deg);
+      z-index: 2;
+    }
+
+    .inner-group-pos {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .rectangle-1-left {
+      height: 35px;
+      width: 150px;
+      background-color: black;
+      position: absolute;
+      top: 55px;
+      left: -30px;
+      transform: rotate(18deg);
+      z-index: 1;
+    }
+
+    .square-top-left-1 {
+      height: 35px;
+      width: 25px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 15%;
+      transform: rotate(8deg);
+      z-index: 1;
+    }
+
+    .square-top-left-2 {
+      height: 35px;
+      width: 36px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 20%;
+      transform: rotate(-6deg);
+      top: -2px;
+      left: 22px;
+      z-index: 1;
+    }
+
+    .square-top-right-1 {
+      height: 35px;
+      width: 40px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 20%;
+      transform: rotate(-10deg);
+      top: -6px;
+      left: 56px;
+      z-index: 1;
+    }
+
+    .square-top-right-2 {
+      height: 26px;
+      width: 40px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 15%;
+      transform: rotate(-15deg);
+      top: -11px;
+      left: 95px;
+    }
+
+    .square-bottom-right-1 {
+      height: 20px;
+      width: 25px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 15%;
+      transform: rotate(-10deg);
+      top: 27px;
+      left: 83px;
+    }
+
+    .square-bottom-right-2 {
+      height: 20px;
+      width: 35px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 30%;
+      transform: rotate(-13deg);
+      top: 21px;
+      left: 108px;
+    }
+
+    .square-bottom-right-3 {
+      height: 28px;
+      width: 20px;
+      background-color: var(--main-teeth-color);
+      position: absolute;
+      border-radius: 30%;
+      transform: rotate(-10deg);
+      top: 10px;
+      left: 142px;
+    }
+
+    .inner-background {
+      height: 65px;
+      width: 184px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 50%;
+      transform: rotate(20deg);
+      top: 41px;
+      left: -49px;
+    }
+
+    .inner-extra-bg {
+      height: 45px;
+      width: 80px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 50%;
+      top: 30px;
+      left: 17px;
+      transform: rotate(20deg);
+    }
+
+    .oval-1 {
+      height: 35px;
+      width: 68px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 50%;
+      top: -2px;
+      left: -37px;
+      transform: rotate(-37deg);
+      z-index: 2;
+    }
+
+    .oval-2 {
+      height: 30px;
+      width: 40px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 30%;
+      top: -15px;
+      left: 13px;
+      transform: rotate(-1deg);
+      z-index: 2;
+    }
+
+    .oval-3 {
+      height: 30px;
+      width: 25px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 35%;
+      top: -20px;
+      left: 44px;
+      transform: rotate(-12deg);
+      z-index: 2;
+    }
+
+    .oval-4 {
+      height: 30px;
+      width: 20px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 35%;
+      top: -25px;
+      left: 65px;
+      transform: rotate(6deg);
+      z-index: 2;
+    }
+
+    .oval-5 {
+      height: 30px;
+      width: 15px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 31%;
+      top: -24px;
+      left: 81px;
+      transform: rotate(16deg);
+      z-index: 2;
+    }
+
+    .oval-6 {
+      height: 7px;
+      width: 0px;
+      position: absolute;
+      top: 12px;
+      left: 82px;
+      transform: rotate(-71deg);
+      z-index: 1;
+    }
+
+    .oval-6:before {
+      content: '';
+      position: absolute;
+      height: 50px;
+      width: 10px;
+      background: none;
+      box-shadow: 5px 0px 0px 0px var(--main-lip-color);
+      top: 1px;
+      left: 3px;
+      border-radius: 50%;
+    }
+
+    .oval-6:after {
+      content: '';
+      position: absolute;
+      height: 53px;
+      width: 10px;
+      background: none;
+      box-shadow: -5px 0px 0px 0px var(--main-lip-color);
+      top: 40px;
+      left: 17px;
+      transform: rotate(-8deg);
+      border-radius: 50%;
+    }
+
+    .oval-7 {
+      height: 0px;
+      width: 0px;
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      z-index: 1;
+    }
+
+    .oval-7:before {
+      content: '';
+      position: absolute;
+      height: 110px;
+      width: 15px;
+      background: none;
+      box-shadow: -5px 0px 0px 0px var(--main-lip-color);
+      top: -34px;
+      left: 111px;
+      transform: rotate(-89deg);
+      border-radius: 50%;
+    }
+
+    .oval-8 {
+      height: 25px;
+      width: 106px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 50%;
+      top: -16px;
+      left: 78px;
+      transform: rotate(35deg);
+      z-index: 1;
+    }
+
+    .oval-9 {
+      height: 19px;
+      width: 65px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      top: -5px;
+      left: 92px;
+      transform: rotate(19deg);
+      z-index: 2;
+    }
+
+    .oval-12 {
+      height: 10px;
+      width: 33px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      top: 0px;
+      left: 89px;
+      transform: rotate(16deg);
+      z-index: 2;
+    }
+
+    .oval-10 {
+      height: 20px;
+      width: 103px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      top: 31px;
+      left: 66px;
+      transform: rotate(1deg);
+      z-index: 1;
+    }
+
+    .oval-11 {
+      height: 33px;
+      width: 82px;
+      background-color: var(--main-lip-color);
+      position: absolute;
+      border-radius: 50%;
+      top: 21px;
+      left: -2px;
+      transform: rotate(1deg);
+      z-index: 1;
+    }
+
+    .rect-1 {
+      height: 25px;
+      width: 150px;
+      position: absolute;
+      background-color: var(--main-lip-color);
+      top: 41px;
+      left: -25px;
+      z-index: 2;
+      transform: rotate(9deg);
+    }
+
+    .rect-2 {
+      height: 25px;
+      width: 55px;
+      position: absolute;
+      background-color: var(--main-lip-color);
+      top: -23px;
+      left: 74px;
+      z-index: 2;
+      transform: rotate(10deg);
+    }
+
+    .shade-1 {
+      height: 26px;
+      width: 0px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 7px 8px 14px 8px black;
+      z-index: 1;
+      transform: rotate(5deg);
+    }
+
+    .shade-2 {
+      height: 0px;
+      width: 13px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 15px 17px 14px 8px black;
+      z-index: 1;
+      transform: rotate(-11deg);
+    }
+
+    .shade-3 {
+      height: 0px;
+      width: 15px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 42px 10px 14px 8px black;
+      z-index: 1;
+      transform: rotate(-2deg);
+    }
+
+    .shade-4 {
+      height: 0px;
+      width: 26px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 69px 2px 14px 8px black;
+      z-index: 1;
+      transform: rotate(0deg);
+    }
+
+    .shade-5 {
+      height: 0px;
+      width: 26px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 128px 29px 14px 8px black;
+      z-index: 0;
+      transform: rotate(0deg);
+    }
+
+    .shade-6 {
+      height: 0px;
+      width: 6px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 95px 33px 14px 8px black;
+      z-index: 0;
+      transform: rotate(0deg);
+    }
+
+    .shade-7 {
+      height: 0px;
+      width: 0px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 159px 28px 14px 10px black;
+      z-index: 0;
+      transform: rotate(0deg);
+    }
+
+    .glow-1 {
+      height: 8px;
+      width: 0px;
+      position: absolute;
+      background-color: white;
+      box-shadow: 73px 18px 30px 8px white;
+      z-index: 2;
+      transform: rotate(22deg);
+    }
+
+    .glow-2 {
+      height: 17px;
+      width: 0px;
+      position: absolute;
+      background-color: white;
+      box-shadow: 36px 25px 31px 8px white;
+      z-index: 2;
+      transform: rotate(22deg);
+    }
+
+    .glow-3 {
+      height: 0px;
+      width: 126px;
+      position: absolute;
+      background-color: white;
+      box-shadow: 18px 119px 27px 3px white;
+      z-index: 2;
+      transform: rotate(26deg);
+    }
+
+    .burn-1 {
+      height: 0px;
+      width: 30px;
+      position: absolute;
+      background-color: black;
+      box-shadow: 154px 30px 23px 4px black;
+      z-index: 2;
+      transform: rotate(40deg);
+    }
+
+    .burn-2 {
+      height: 0px;
+      width: 56px;
+      position: absolute;
+      background-color: black;
+      box-shadow: -52px 79px 31px 7px black;
+      z-index: 2;
+      transform: rotate(9deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+		<div class="circle-group-pos">
+			<div class="circle-left">
+				<div class="triangle-left"></div>
+				<div class="oval-t-left-edge"></div>
+			</div>
+			<div class="inner-group-pos">
+				<div class="inner-background"></div>
+				<div class="inner-extra-bg"></div>
+				<div class="rectangle-1-left">
+					<div class="inner-foreground">
+						<div class="outer-elements">
+							<div class="oval-1"></div>
+							<div class="oval-2"></div>
+							<div class="oval-3"></div>
+							<div class="oval-4"></div>
+							<div class="oval-5"></div>
+							<div class="oval-6"></div>
+							<div class="oval-7"></div>
+						</div>
+						<div class="hider-elements">
+							<div class="oval-8"></div>
+							<div class="oval-9"></div>
+							<div class="oval-12"></div>
+							<div class="oval-10"></div>
+							<div class="oval-11"></div>
+						</div>
+					</div>
+					<div class="square-top-left-1"></div>
+					<div class="square-top-left-2"></div>
+					<div class="square-top-right-1"></div>
+					<div class="square-top-right-2"></div>
+					<div class="square-bottom-right-1"></div>
+					<div class="square-bottom-right-2"></div>
+					<div class="square-bottom-right-3"></div>
+					<div class="inner-shadows">
+						<div class="shade-1"></div>
+						<div class="shade-2"></div>
+						<div class="shade-3"></div>
+						<div class="shade-4"></div>
+						<div class="shade-5"></div>
+						<div class="shade-6"></div>
+						<div class="shade-7"></div>
+					</div>
+					<div class="shade-hiders">
+						<div class="rect-1"></div>
+						<div class="rect-2"></div>
+					</div>
+				</div>
+			</div>
+			<div class="oval-t-down-edge"></div>
+			<div class="triangle-down"></div>
+			<div class="circle-right">
+				<div class="oval-t-right-top-edge"></div>
+				<div class="triangle-right"></div>
+				<div class="oval-t-right-bottom-edge"></div>
+			</div>
+			<div class="light-elements">
+				<div class="glow">
+					<div class="glow-1"></div>
+					<div class="glow-2"></div>
+					<div class="glow-3"></div>
+				</div>
+				<div class="burn">
+					<div class="burn-1"></div>
+					<div class="burn-2"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
