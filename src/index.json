@@ -109,6 +109,26 @@
       "title": "弹跳球",
       "img": "/web-effect-favorites/assets/images/popping-ball.png",
       "link": "/web-effect-favorites/popping-ball/"
+    },
+    {
+      "title": "地平线上的流星雨",
+      "img": "/web-effect-favorites/assets/images/meteor-shower-on-horizon.png",
+      "link": "/web-effect-favorites/meteor-shower-on-horizon/"
+    },
+    {
+      "title": "圆圈文本",
+      "img": "/web-effect-favorites/assets/images/text-by-circles.png",
+      "link": "/web-effect-favorites/text-by-circles/"
+    },
+    {
+      "title": "图像粒子化",
+      "img": "/web-effect-favorites/assets/images/image-particle.png",
+      "link": "/web-effect-favorites/image-particle/"
+    },
+    {
+      "title": "线状文字",
+      "img": "/web-effect-favorites/assets/images/wire-typo.png",
+      "link": "/web-effect-favorites/wire-typo/"
     }
   ] 
 }
