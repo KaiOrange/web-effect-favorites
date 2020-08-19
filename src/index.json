@@ -79,7 +79,36 @@
       "title": "绿光小球",
       "img": "/web-effect-favorites/assets/images/green-light-ball.png",
       "link": "/web-effect-favorites/green-light-ball/"
+    },
+    {
+      "title": "环",
+      "img": "/web-effect-favorites/assets/images/ring.png",
+      "link": "/web-effect-favorites/ring/"
+    },
+    {
+      "title": "电闪雷鸣",
+      "img": "/web-effect-favorites/assets/images/cloud-and-rain.png",
+      "link": "/web-effect-favorites/cloud-and-rain/"
+    },
+    {
+      "title": "粒子文字",
+      "img": "/web-effect-favorites/assets/images/particle-text.png",
+      "link": "/web-effect-favorites/particle-text/"
+    },
+    {
+      "title": "粒子文字2",
+      "img": "/web-effect-favorites/assets/images/particle-text-2.png",
+      "link": "/web-effect-favorites/particle-text-2/"
+    },
+    {
+      "title": "星光特效",
+      "img": "/web-effect-favorites/assets/images/starlight-effect.png",
+      "link": "/web-effect-favorites/starlight-effect/"
+    },
+    {
+      "title": "弹跳球",
+      "img": "/web-effect-favorites/assets/images/popping-ball.png",
+      "link": "/web-effect-favorites/popping-ball/"
     }
-    
   ] 
 }

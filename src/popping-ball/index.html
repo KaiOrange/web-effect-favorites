@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>弹跳球</title>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  canvas#canvas {
+    display: block;
+    background: #092745;
+  }
+
+  div.controller {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 1.6rem
+  }
+  </style>  
+</head>
+<body>
+  <canvas id="canvas">Canvas not supported.</canvas>
+  <div class="controller">
+    <p><input type="range" id="count" min="1" max="400" step="1" value="200"></p>
+  </div>
+  <script type="text/javascript">
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        var canvas = document.getElementById('canvas');
+
+        if (!canvas || !canvas.getContext) {
+          return false;
+        }
+
+        /********************
+          Random Number
+        ********************/
+
+        function rand(min, max) {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        /********************
+          Var
+        ********************/
+
+        // canvas 
+        var ctx = canvas.getContext('2d');
+        var count = document.getElementById('count');
+        var X = canvas.width = window.innerWidth;
+        var Y = canvas.height = window.innerHeight;
+        var mouseX = X / 2;
+        var mouseY = Y / 2;
+        var ease = 0.2;
+        var friction = 0.9;
+        var flg = false;
+        
+        /********************
+          Animation
+        ********************/
+
+        window.requestAnimationFrame =
+          window.requestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.msRequestAnimationFrame ||
+          function(cb) {
+            setTimeout(cb, 17);
+          };
+
+        /********************
+          Particle
+        ********************/
+        
+        var particleNum = count.value;
+        var particles = [];
+
+        if (X < 768) {
+          particleNum = 100;
+        }
+
+        function Particle(ctx, x, y) {
+          this.ctx = ctx;
+          this.init(x, y);
+        }
+        Particle.prototype.init = function(x, y) {
+          this.x = x;
+          this.y = y;
+          this.x1 = this.x;
+          this.y1 = this.y;
+          this.r = rand(5, 30);
+          this.lw = this.r / 4;
+          this.a = rand(0, 360);
+          this.rad = this.a * Math.PI / 180;
+          this.v = {
+            x: 0,
+            y: 0,
+            x1: rand(-100, 100),
+            y1: rand(-100, 100)
+          };
+          this.c = {
+            r: rand(0, 255),
+            g: rand(0, 255),
+            b: rand(200, 255)
+          };
+          this.gc = {
+            r: this.c.r * 1.5,
+            g: this.c.g * 1.5,
+            b: this.c.b * 1.5
+          };
+        };
+        Particle.prototype.draw = function() {
+          var ctx = this.ctx;
+          ctx.save();
+          ctx.fillStyle = 'rgb(' + this.c.r + ', ' + this.c.g + ', ' + this.c.b + ')';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
+          ctx.fill();
+          ctx.restore();
+          ctx.save();
+          ctx.strokeStyle = 'rgb(' + this.gc.r + ', ' + this.gc.g + ', ' + this.gc.b + ')';
+          ctx.lineCap = 'round';
+          ctx.lineWidth = this.lw;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r * 0.7, this.rad, this.rad + 1, false);
+          ctx.stroke();
+          ctx.restore();
+        };
+        Particle.prototype.updatePosition = function(i) {
+          this.v.x += (mouseX - this.x) * ease;
+          this.v.y += (mouseY - this.y) * ease;
+          this.v.x *= friction;
+          this.v.y *= friction;
+          this.x += this.v.x;
+          this.y += this.v.y;
+        };
+        Particle.prototype.returnPosition = function() {
+          this.v.x += (this.x1 - this.x) * ease;
+          this.v.y += (this.y1 - this.y) * ease;
+          this.v.x *= friction;
+          this.v.y *= friction;
+          this.x += this.v.x;
+          this.y += this.v.y;
+        };
+        Particle.prototype.move = function() {
+          this.x += this.v.x1;
+          this.y += this.v.y1;
+        };
+        Particle.prototype.resize =function() {
+          this.x = rand(0, X);
+          this.y = rand(0, Y);
+          this.x1 = this.x;
+          this.y1 = this.y;
+        }; 
+        Particle.prototype.render = function(i) {
+          if (flg === true) {
+            this.updatePosition(i);
+          } else {
+            this.move();
+            this.returnPosition();
+          }
+          this.draw();
+        };
+
+        for (var i = 0; i < particleNum; i++) {
+          var particle = new Particle(ctx, rand(0, X), rand(0, Y));
+          particles.push(particle);
+        }
+
+        /********************
+          Render
+        ********************/
+        
+        function render(){
+          ctx.clearRect(0, 0, X, Y);
+          for (var i = 0; i < particles.length; i++) {
+            particles[i].render(i);
+          }
+          requestAnimationFrame(render);
+        }
+        render();
+
+        /********************
+          Event
+        ********************/
+        
+        function onResize() {
+          X = canvas.width = window.innerWidth;
+          Y = canvas.height = window.innerHeight;
+          for (var i = 0; i < particles.length; i++) {
+            particles[i].resize();
+          }
+        }
+        window.addEventListener('resize', function() {
+          onResize();
+        });
+        window.addEventListener('mousemove', function(e) {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+        });
+        canvas.addEventListener('click', function(e) {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          flg === true ? flg = false : flg = true;
+        });
+        count.addEventListener('change', function() {
+          particles = [];
+          var val = this.value;
+          particleNum = val;
+          for (var i = 0; i < particleNum; i++) {
+            var particle = new Particle(ctx, rand(0, X), rand(0, Y));
+            particles.push(particle);
+          }
+        });
+
+      }); 
+      // Author
+      console.log('作者信息：File Name / poppingBall.js\nCreated Date / May 13, 2020\nAuthor / Toshiya Marukubo\nTwitter / https://twitter.com/toshiyamarukubo');
+    })();
+  </script>
+</body>
+</html>
