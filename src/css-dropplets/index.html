@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>纯CSS水滴效果</title>
+  <style>
+  
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .paper {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+    }
+    .paper::before {
+      content: '';
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      filter: url(#paper);
+    }
+    .paper::after {
+      content: '';
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background-image: linear-gradient(190deg, rgba(201, 201, 201, 0.1), rgba(85, 85, 85, 0.4));
+    }
+
+    .dropplets {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotateZ(8deg);
+    }
+
+    .dropplet {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      position: absolute;
+    }
+    .dropplet:nth-child(1) {
+      top: calc(50% - 130px);
+      left: calc(50% + 110px);
+    }
+    .dropplet:nth-child(1)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 80px;
+      height: 75px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-image: radial-gradient(ellipse at center, white 40%, transparent 60%);
+      background-size: 10px 6px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 14px 0px 5px -10px rgba(0, 0, 0, 0.2), inset 13px 0px 2px -10px rgba(0, 0, 0, 0.2), inset 0px -3px 5px 0px rgba(250, 241, 220, 0.5), inset 0px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -20px 10px 5px -20px rgba(0, 0, 0, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 20px 30px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -16px 13px 5px -20px black, 17px 13px 5px -20px black, 15px 19px 5px -20px black, -2px 34px 1px -30px rgba(0, 0, 0, 0.4), -2px 35px 3px -30px rgba(255, 255, 255, 0.3), -1px 16px 3px -5px rgba(0, 0, 0, 0.5), -1px 21px 3px -5px rgba(0, 0, 0, 0.4), 1px -1px 5px 0px rgba(50, 50, 50, 0.5);
+    }
+    .dropplet:nth-child(1)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 80px;
+      height: 75px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(2)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 100px;
+      height: 80px;
+      border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+      background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, white 10%, white 40%, transparent 60%);
+      background-size: 12px 8px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 0px 1px 10px 0px rgba(0, 0, 0, 0.2), inset 14px 5px 2px -10px rgba(169, 168, 168, 0.7), inset 0px -3px 5px 0px rgba(250, 241, 220, 0.1), inset 0px -5px 20px 1px rgba(255, 255, 255, 0.1), inset -3px 3px 2px 0px rgba(169, 168, 168, 0.5), inset -23px 7px 2px -20px rgba(169, 168, 168, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.3), inset 0px 2px 1px 0px rgba(58, 2, 2, 0.3), inset 0px 30px 30px 0px rgba(0, 0, 0, 0.2), 0px 2px 1px -1px rgba(245, 227, 183, 0.6), 0px 4px 2px -1px rgba(131, 131, 131, 0.5), -20px -4px 5px -20px #666666, -22px 8px 5px -20px #666666, -20px 16px 5px -20px #666666, 17px 13px 5px -20px #666666, 15px 19px 5px -20px #6c6c6c, -1px 16px 3px -5px rgba(0, 0, 0, 0.5), -1px 21px 3px -5px rgba(0, 0, 0, 0.3), 0px 0px 2px 0px rgba(0, 0, 0, 0.1);
+    }
+    .dropplet:nth-child(2)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 100px;
+      height: 80px;
+      border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(3) {
+      top: calc(50% + 120px);
+      left: calc(50% - 80px);
+    }
+    .dropplet:nth-child(3)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 90% 60% 100% 50% / 90% 50% 100% 45%;
+      background-image: radial-gradient(ellipse at center, white 40%, transparent 60%);
+      background-size: 10px 10px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 13px -4px 4px -10px rgba(0, 0, 0, 0.4), inset 14px -4px 10px -10px rgba(0, 0, 0, 0.2), inset 0px -3px 10px 1px rgba(250, 241, 220, 0.8), inset 0px -15px 10px 0px rgba(0, 0, 0, 0.2), inset -20px 10px 5px -20px rgba(0, 0, 0, 0.2), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 3px 2px 1px rgba(0, 0, 0, 0.2), inset 0px 30px 20px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -16px 13px 5px -20px black, 17px 13px 5px -20px black, 15px 19px 5px -20px black, -1px 16px 3px -5px rgba(0, 0, 0, 0.4), -1px 21px 3px -5px rgba(0, 0, 0, 0.3), 1px -1px 1px 0px rgba(50, 50, 50, 0.1);
+    }
+    .dropplet:nth-child(3)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 90% 60% 100% 50% / 90% 50% 100% 45%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(4) {
+      top: calc(50% + 160px);
+      left: calc(50% + 90px);
+    }
+    .dropplet:nth-child(4)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-image: radial-gradient(ellipse at center, white 30%, transparent 60%);
+      background-size: 6px 6px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 15px 0px 5px -10px rgba(0, 0, 0, 0.2), inset 13px 0px 2px -10px rgba(0, 0, 0, 0.2), inset 0px -3px 5px 0px rgba(250, 241, 220, 0.5), inset 0px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -23px 10px 5px -20px rgba(0, 0, 0, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 25px 20px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -17px 10px 5px -20px black, 14px 20px 5px -20px black, 16px 14px 5px -20px black, -2px 27px 5px -20px rgba(255, 255, 255, 0.3), -1px 14px 3px -5px rgba(0, 0, 0, 0.5), -1px 18px 3px -5px rgba(0, 0, 0, 0.4), 0px -1px 5px 0px rgba(85, 85, 85, 0.5);
+    }
+    .dropplet:nth-child(4)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(5) {
+      top: calc(50% - 180px);
+      left: calc(50% - 30px);
+    }
+    .dropplet:nth-child(5)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 65px;
+      height: 68px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-image: radial-gradient(ellipse at center, white 40%, transparent 60%);
+      background-size: 10px 6px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 12px 5px 5px -10px rgba(0, 0, 0, 0.3), inset 10px 5px 2px -10px rgba(0, 0, 0, 0.2), inset -1px -3px 5px 0px rgba(250, 241, 220, 0.5), inset -1px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -20px 10px 5px -20px rgba(0, 0, 0, 0.4), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.4), inset 0px 20px 30px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -18px 11px 5px -20px rgba(0, 0, 0, 0.9), -17px 19px 5px -20px rgba(0, 0, 0, 0.6), 17px 12px 5px -20px rgba(0, 0, 0, 0.9), 15px 18px 5px -20px rgba(0, 0, 0, 0.9), -4px 30px 1px -25px rgba(0, 0, 0, 0.4), -4px 32px 3px -25px rgba(255, 255, 255, 0.1), -1px 14px 3px -5px rgba(0, 0, 0, 0.5), -1px 19px 3px -5px rgba(0, 0, 0, 0.4), 1px -1px 5px 0px rgba(50, 50, 50, 0.5);
+    }
+    .dropplet:nth-child(5)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 65px;
+      height: 68px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(6) {
+      top: calc(50% - 60px);
+      left: calc(50% - 30px);
+    }
+    .dropplet:nth-child(6)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-image: radial-gradient(ellipse at center, white 40%, transparent 60%);
+      background-size: 5px 6px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 14px 0px 5px -10px rgba(0, 0, 0, 0.2), inset 13px 0px 5px -10px rgba(0, 0, 0, 0.2), inset 0px -3px 5px 0px rgba(250, 241, 220, 0.5), inset 0px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -20px 10px 5px -20px rgba(0, 0, 0, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 20px 30px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -9px 10px 3px -10px rgba(0, 0, 0, 0.4), 8px 14px 2px -10px rgba(0, 0, 0, 0.2), 10px 10px 5px -10px rgba(0, 0, 0, 0.2), 1px 15px 3px -10px rgba(255, 255, 255, 0.3), -1px 14px 3px -6px rgba(0, 0, 0, 0.5), -1px 17px 3px -6px rgba(0, 0, 0, 0.2), 1px -1px 5px 0px rgba(50, 50, 50, 0.5);
+    }
+    .dropplet:nth-child(6)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 45% 45%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(7) {
+      top: calc(50% - 30px);
+      left: calc(50% - 80px);
+    }
+    .dropplet:nth-child(7)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      border-radius: 50% 60% 40% 70% / 50% 60% 50% 70%;
+      background-image: radial-gradient(ellipse at center, white 50%, transparent 50%);
+      background-size: 3px 3px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 10px 10px 5px -10px rgba(0, 0, 0, 0.2), inset 10px 10px 2px -10px rgba(0, 0, 0, 0.2), inset 1px -3px 5px 0px rgba(250, 241, 220, 0.5), inset 1px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -20px 15px 5px -20px rgba(0, 0, 0, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 20px 30px -5px rgba(0, 0, 0, 0.3), -1px 2px 1px -1px rgba(245, 227, 183, 0.8), -1px 5px 2px 0px rgba(0, 0, 0, 0.8), 1px -1px 5px 0px rgba(0, 0, 0, 0.2);
+    }
+    .dropplet:nth-child(7)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      border-radius: 50% 60% 40% 70% / 50% 60% 50% 70%;
+      background-color: red;
+      filter: url(#water);
+    }
+    .dropplet:nth-child(8) {
+      top: calc(50% + 20px);
+      left: calc(50% - 80px);
+    }
+    .dropplet:nth-child(8)::after {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      border-radius: 60% 50% 60% 50% / 60% 50% 60% 50%;
+      background-image: radial-gradient(ellipse at center, white 50%, transparent 60%);
+      background-size: 4px 4px;
+      background-position: 60% 25%;
+      background-repeat: no-repeat;
+      box-shadow: inset 14px 0px 5px -10px rgba(0, 0, 0, 0.2), inset 13px 0px 2px -10px rgba(0, 0, 0, 0.2), inset 0px -3px 5px 0px rgba(250, 241, 220, 0.5), inset 0px -20px 10px 1px rgba(255, 255, 255, 0.3), inset -20px 10px 5px -20px rgba(0, 0, 0, 0.3), inset -20px 15px 10px -20px rgba(0, 0, 0, 0.2), inset 0px 20px 30px -5px rgba(0, 0, 0, 0.3), 0px 2px 1px -1px rgba(245, 227, 183, 0.8), -17px 16px 5px -20px black, -18px 10px 5px -20px black, 19px 10px 5px -20px black, 16px 15px 5px -20px black, 14px 20px 5px -20px black, -4px 19px 3px -17px white, -1px 13px 3px -5px rgba(0, 0, 0, 0.5), -1px 15px 3px -5px rgba(0, 0, 0, 0.4), 1px -1px 5px 0px rgba(0, 0, 0, 0.3);
+    }
+    .dropplet:nth-child(8)::before {
+      content: '';
+      top: -25px;
+      left: -55px;
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      border-radius: 60% 50% 60% 50% / 60% 50% 60% 50%;
+      background-color: red;
+      filter: url(#water);
+    }
+
+    @media only screen and (max-width: 800px) {
+      .dropplets {
+        transform: scale(0.5);
+      }
+    }
+    /* 
+    * uncomment the following css to remove filters
+    * but it will look lame :)
+    */
+    .no-filter {
+      width: 100%;
+      height: 100%;
+      /*
+      .paper::before {
+        display: none;
+      }
+      .dropplet::before {
+        display: none;
+      }
+      */
+    }
+
+  </style>  
+</head>
+<body>
+
+  <div class="no-filter">
+  <div class="paper"></div>
+  <div class="dropplets no-filter">
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+    <div class="dropplet"></div>
+  </div>
+  </div>
+  <svg width="0" height="0">
+    <filter id="paper">
+      <feTurbulence type="fractalNoise" baseFrequency='0.03 0.06' numOctaves="10" result='noise' />
+      <feDiffuseLighting in='noise' lighting-color='#e2e1db' surfaceScale='2'>
+        <feDistantLight azimuth='45' elevation='40' />
+      </feDiffuseLighting>
+    </filter>
+    <filter id="water">
+      <feTurbulence type="fractalNoise" baseFrequency='0.03 0.06' numOctaves="10" result='noise' />
+      <feDiffuseLighting in='noise' lighting-color='#e2e1db' surfaceScale='4' result="texture">
+        <feDistantLight azimuth='45' elevation='35' />
+      </feDiffuseLighting>
+      <feComposite in="texture" in2="SourceGraphic" operator="in" />
+    </filter>
+  </svg>
+      
+  
+  <script type="text/javascript">
+
+  </script>
+</body>
+</html>

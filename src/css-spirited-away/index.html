@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>纯CSS千与千寻插画</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      position: absolute;
+    }
+
+    :root {
+      --size: 100;
+      --unit: calc((var(--size) / 663) * 1vmin);
+    }
+
+    html,
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+
+    .container {
+      height: calc(var(--unit) * 663);
+      width: calc(var(--unit) * 863);
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .background {
+      width: 100%;
+      height: 100%;
+    }
+
+    .background .water {
+      z-index: 2;
+      width: 100%;
+      height: calc(var(--unit) * 120);
+      top: 35%;
+      background-color: #0398c5;
+      box-shadow: 0 calc(var(--unit) * -2) calc(var(--unit) * 50)
+          rgba(255, 255, 255, 0.8),
+        0 calc(var(--unit) * 2) calc(var(--unit) * 30) rgba(255, 255, 255, 0.8)
+          inset;
+      background-repeat: no-repeat, no-repeat;
+      background-image: linear-gradient(
+          rgba(255, 255, 255, 0.1) 0.5%,
+          rgba(255, 255, 255, 0) 2%
+        ),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%),
+        linear-gradient(rgba(255, 255, 255, 0.1) 0.5%, rgba(255, 255, 255, 0) 2%);
+      background-position: calc(var(--unit) * 50) calc(var(--unit) * 90),
+        calc(var(--unit) * 300) calc(var(--unit) * 80),
+        calc(var(--unit) * 275) calc(var(--unit) * 85),
+        calc(var(--unit) * 350) calc(var(--unit) * 70),
+        calc(var(--unit) * 100) calc(var(--unit) * 80),
+        calc(var(--unit) * 180) calc(var(--unit) * 75),
+        calc(var(--unit) * 600) calc(var(--unit) * 65),
+        calc(var(--unit) * 700) calc(var(--unit) * 75),
+        calc(var(--unit) * 850) calc(var(--unit) * 80), right calc(var(--unit) * 75),
+        left calc(var(--unit) * 65);
+      background-size: 18% 100%, 15% 100%, 40% 100%, 15% 100%, 5% 100%, 5% 100%,
+        35% 100%, 10% 100%, 10% 100%, 18% 100%, 28% 100%;
+    }
+
+    .background .sky {
+      position: relative;
+      width: 100%;
+      height: 50%;
+      background-repeat: no-repeat;
+      background-image: linear-gradient(#0099c3 30%, #5abad2 50%);
+      background-position: top left;
+      background-size: 100% 100%;
+      overflow: hidden;
+    }
+
+    .background .sky .clouds,
+    .background .reflection .clouds {
+      width: 250vw;
+      height: 100%;
+      animation: move 30s linear infinite;
+      left: 100vw;
+    }
+
+    .cloud {
+      border-radius: 50%;
+      z-index: 3;
+      filter: url(#filter);
+    }
+
+    .cloud1 {
+      left: 100vw;
+      width: calc(var(--unit) * 300);
+      height: calc(var(--unit) * 10);
+      box-shadow: calc(var(--unit) * 100) calc(var(--unit) * 100)
+        calc(var(--unit) * 20) calc(var(--unit) * 60) #cee5e3;
+    }
+
+    .cloud2 {
+      top: 15%;
+      width: calc(var(--unit) * 350);
+      height: calc(var(--unit) * 0);
+      box-shadow: calc(var(--unit) * 100) calc(var(--unit) * 40)
+        calc(var(--unit) * 30) calc(var(--unit) * 60) #cee5e3;
+    }
+
+    .cloud1::after {
+      bottom: 0;
+      content: "";
+      width: 80%;
+      height: 20%;
+      box-shadow: calc(var(--unit) * 150) calc(var(--unit) * 135)
+        calc(var(--unit) * 30) calc(var(--unit) * 20) rgba(70, 144, 146, 0.6);
+    }
+
+    .cloud2::after {
+      bottom: 0;
+      content: "";
+      width: 80%;
+      box-shadow: calc(var(--unit) * 150) calc(var(--unit) * 60)
+        calc(var(--unit) * 30) calc(var(--unit) * 18) rgba(70, 144, 146, 0.5);
+    }
+
+    @keyframes move {
+      to {
+        transform: translateX(-250vw);
+      }
+    }
+
+    .background .reflection {
+      width: 100%;
+      height: calc(var(--unit) * 140);
+
+      z-index: 3;
+      transform: scaleY(-1);
+      opacity: 0.45;
+    }
+
+    .background .reflection .cloud2 {
+      top: 55%;
+    }
+
+    .background .reflection .cloud1 {
+      top: 10%;
+    }
+
+    .train {
+      width: 100%;
+      height: 100%;
+      z-index: 4;
+    }
+
+    .train .windows {
+      width: 100%;
+      z-index: 2;
+      height: calc(var(--unit) * 382);
+      background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+        no-repeat, no-repeat, no-repeat;
+      background-image: linear-gradient(
+          rgba(255, 255, 255, 0) 2%,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0) 35%
+        ),
+        linear-gradient(
+          rgba(255, 255, 255, 0) 2%,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0) 35%
+        ),
+        linear-gradient(
+          rgba(100, 103, 93, 0) 96.5%,
+          rgb(100, 103, 93) 97%,
+          rgba(100, 103, 93, 0) 97.5%
+        ),
+        linear-gradient(
+          rgba(100, 103, 93, 0) 96.5%,
+          rgb(100, 103, 93) 97%,
+          rgba(100, 103, 93, 0) 97.5%
+        ),
+        linear-gradient(
+          rgba(100, 103, 93, 0) 96.5%,
+          rgb(100, 103, 93) 97%,
+          rgba(100, 103, 93, 0) 97.5%
+        ),
+        linear-gradient(
+          to right,
+          rgba(100, 103, 93, 0) 7.5%,
+          rgb(100, 103, 93) 7.6% 7.8%,
+          rgb(38, 40, 35) 7.9% 8%,
+          rgba(38, 40, 35, 0) 8.3% 13%,
+          rgb(38, 40, 35) 13.1% 13.2%,
+          rgb(100, 103, 93) 13.3% 13.4%,
+          rgba(00, 103, 93, 0) 13.7% 55%,
+          rgb(100, 103, 93) 55.2% 55.4%,
+          rgb(38, 40, 35) 55.5% 55.6%,
+          rgba(38, 40, 35, 0) 55.9% 60%,
+          rgb(38, 40, 35) 60.1% 60.2%,
+          rgb(100, 103, 93) 60.3% 60.4%,
+          rgba(100, 103, 93, 0) 60.6%
+        ),
+        linear-gradient(
+          to right,
+          rgba(62, 52, 50, 0) 5.5%,
+          rgb(62, 52, 50) 6% 15.5%,
+          rgba(62, 52, 50, 0) 16% 53%,
+          rgb(62, 52, 50) 53.5% 62.5%,
+          rgba(62, 52, 50, 0) 63%
+        ),
+        linear-gradient(
+          rgba(109, 148, 154, 0) 90.5%,
+          rgb(109, 148, 154) 91%,
+          rgb(62, 52, 50) 91.5%
+        );
+      background-size: 5.7% 100%, 5.7% 100%, 42.2% 100%, 42.2% 100%, 7.8% 100%,
+        100% 97.2%, 100% 100%, 100% 100%;
+      background-position: top left 58.5%, top left 8%, top left 104%,
+        top left 22.9%, top left, top left, top left, top left;
+    }
+
+    .train .handle {
+      z-index: 3;
+      top: -2%;
+      width: calc(var(--unit) * 90);
+      height: calc(var(--unit) * 90);
+
+      border-radius: 50%;
+      border: calc(var(--unit) * 2) solid #17505b;
+      box-shadow: calc(var(--unit) * -3) calc(var(--unit) * -3)
+        calc(var(--unit) * 2.5) #364242 inset;
+      background-image: radial-gradient(
+        transparent 49%,
+        #17505b 51% 52%,
+        #6b6f5e 54%
+      );
+    }
+
+    .handle1 {
+      left: -6.5%;
+    }
+
+    .handle2 {
+      left: 16%;
+    }
+
+    .handle3 {
+      left: 37%;
+    }
+
+    .handle4 {
+      left: 62.5%;
+    }
+
+    .handle5 {
+      left: 83.5%;
+    }
+
+    .train .handle::after {
+      content: "";
+      width: calc(var(--unit) * 24);
+      height: calc(var(--unit) * 20);
+      background: #635645;
+      left: 35%;
+      border-radius: 20%;
+      box-shadow: 0 calc(var(--unit) * -5) calc(var(--unit) * 2) #3b3b39 inset;
+    }
+
+    .train .seats {
+      width: 100%;
+      height: 42.5%;
+      background-repeat: no-repeat;
+      background-image: linear-gradient(
+          rgba(255, 255, 255, 0) 80%,
+          rgba(255, 255, 255, 0.05) 81% 82%,
+          rgba(255, 255, 255, 0) 83.5%
+        ),
+        linear-gradient(
+          #782e3a 2% 10%,
+          #76272d 20%,
+          #332326 60%,
+          #2a211f 62%,
+          #76272d 80% 84%,
+          #3f2127
+        );
+      background-position: top left;
+      background-size: 100% 100%;
+      box-shadow: 0 calc(var(--unit) * 5) 5px rgba(255, 255, 255, 0.15) inset;
+      bottom: 0;
+    }
+
+    .train .noface {
+      z-index: 3;
+      width: calc(var(--unit) * 335);
+      height: calc(var(--unit) * 600);
+      top: 12%;
+      left: 42.5%;
+    }
+
+    .train .noface::after {
+      z-index: 3;
+      content: "";
+      width: 100%;
+      height: 100%;
+      border-radius: 47% 47% 0 0 / 100% 100% 0% 0%;
+      background-repeat: no-repeat;
+      background-image: linear-gradient(
+          to right,
+          rgba(21, 25, 28, 0) 1%,
+          rgba(21, 25, 28, 0.85) 15% 75%,
+          rgba(21, 25, 28, 0) 90%
+        ),
+        linear-gradient(
+          to right,
+          rgba(21, 25, 28, 0) 5%,
+          rgba(21, 25, 28, 0.85) 30% 70%,
+          rgba(21, 25, 28, 0) 95%
+        ),
+        linear-gradient(
+          103deg,
+          rgba(21, 25, 28, 0) 15%,
+          rgba(21, 25, 28, 0.75) 16% 45%,
+          rgba(21, 25, 28, 0) 50%
+        ),
+        linear-gradient(
+          -105deg,
+          rgba(21, 25, 28, 0) 16%,
+          rgba(21, 25, 28, 0.75) 17% 45%,
+          rgba(21, 25, 28, 0) 50%
+        );
+      background-position: top center, bottom left, top left 12%, top right 14%;
+      background-size: 64% 50%, 100% 50%, 79% 190%, 79% 189%;
+      -webkit-clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        96% 86%,
+        94% 89%,
+        92% 100%,
+        8% 100%,
+        6% 89%,
+        4% 86%,
+        0% 75%,
+        0 0
+      );
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        96% 86%,
+        94% 89%,
+        92% 100%,
+        8% 100%,
+        6% 89%,
+        4% 86%,
+        0% 75%,
+        0 0
+      );
+    }
+
+    .train .noface::before {
+      z-index: 1;
+      content: "";
+      width: 80%;
+      height: 51%;
+      bottom: -1%;
+      background: rgba(37, 31, 31, 0.4);
+      left: 23%;
+      border-radius: 0 20% 0 0 / 0 25% 0 0;
+      -webkit-clip-path: polygon(
+        0 0,
+        95% 0,
+        98% 65%,
+        95% 77%,
+        94% 80%,
+        91% 100%,
+        0 0
+      );
+      clip-path: polygon(0 0, 95% 0, 98% 65%, 95% 77%, 94% 80%, 91% 100%, 0 0);
+    }
+
+    .noface .mask {
+      z-index: 4;
+      width: calc(var(--unit) * 135);
+      height: calc(var(--unit) * 232);
+      top: 3.5%;
+      left: 28.5%;
+      border-radius: 50% 50% 40% 40% / 30% 30% 60% 60%;
+      background-color: rgba(150, 162, 158, 0.9);
+      box-shadow: calc(var(--unit) * -15) calc(var(--unit) * -5)
+        calc(var(--unit) * 2) calc(var(--unit) * 2) #5e6e6d inset;
+      opacity: 0.95;
+    }
+
+    .noface .mask .eye {
+      width: calc(var(--unit) * 35);
+      height: calc(var(--unit) * 20);
+      background-color: #1b2021;
+      border-radius: 50%;
+    }
+
+    .noface .mask .eye-left {
+      left: 4%;
+      top: 36%;
+    }
+
+    .noface .mask .eye-right {
+      right: 6%;
+      top: 35%;
+    }
+
+    .noface .mask .eye-left::after,
+    .noface .mask .eye-right::after {
+      content: "";
+      height: calc(var(--unit) * 8);
+      top: 120%;
+      background-color: #414a47;
+      box-shadow: calc(var(--unit) * 0.5) calc(var(--unit) * 0.5)
+          calc(var(--unit) * 2) #1d2824 inset,
+        calc(var(--unit) * -0.5) calc(var(--unit) * -0.5) calc(var(--unit) * 2)
+          #1d2824 inset;
+      border-radius: 50% / 25% 25% 75% 75%;
+    }
+
+    .noface .mask .eye-left::after {
+      width: calc(var(--unit) * 28);
+      left: 15%;
+    }
+
+    .noface .mask .eye-right::after {
+      width: calc(var(--unit) * 25);
+      right: 14%;
+      top: 122%;
+    }
+
+    .noface .mask .mouth {
+      width: calc(var(--unit) * 50);
+      height: calc(var(--unit) * 15);
+      left: 33%;
+      top: 82%;
+      background-color: #1b2021;
+      border-radius: 50%;
+    }
+
+    .noface .mask .mouth::after {
+      content: "";
+      width: calc(var(--unit) * 35);
+      height: calc(var(--unit) * 11);
+      left: 17%;
+      top: 133%;
+      background-color: #4b5453;
+      border-radius: 50% / 30% 30% 60% 60%;
+    }
+
+    .noface .mask .stripe-top {
+      width: calc(var(--unit) * 23);
+      top: 13.5%;
+      background-color: #545769;
+      height: calc(var(--unit) * 44);
+    }
+
+    .noface .mask .stripe-top-left {
+      border-radius: 70% 30% 70% 30% / 90% 90% 10% 10%;
+      left: 11%;
+    }
+
+    .noface .mask .stripe-top-right {
+      right: 12%;
+      border-radius: 30% 70% 30% 70% / 90% 90% 10% 10%;
+      transform: rotate(-5deg);
+    }
+
+    .noface .mask .stripe-bottom {
+      width: calc(var(--unit) * 21);
+      top: 52.5%;
+      background-color: #54566b;
+      height: calc(var(--unit) * 57);
+      border-radius: 30% 60% 20% 80% / 10% 20% 80% 90%;
+    }
+
+    .noface .mask .stripe-bottom-left {
+      left: 12.5%;
+    }
+
+    .noface .mask .stripe-bottom-right {
+      right: 11%;
+      transform: rotateY(180deg);
+    }
+
+    .noface .arm {
+      z-index: 5;
+      width: calc(var(--unit) * 26);
+      height: calc(var(--unit) * 100);
+      background-color: #2f2f31;
+      top: 74%;
+      background-position: top 49% left, top left;
+      background-size: 100% 35%, 100% 38%;
+      background-repeat: no-repeat;
+    }
+
+    .noface .arm-left {
+      left: 24%;
+      transform: rotate(-34deg);
+      clip-path: polygon(
+        31% 0%,
+        74% 0%,
+        85% 10%,
+        66% 24%,
+        100% 70%,
+        41% 93%,
+        38% 90%,
+        47% 87%,
+        84% 71%,
+        34% 86%,
+        30% 84%,
+        64% 70%,
+        19% 79%,
+        54% 69%,
+        0% 33%
+      );
+      -webkit-clip-path: polygon(
+        31% 0%,
+        74% 0%,
+        85% 10%,
+        66% 24%,
+        100% 70%,
+        41% 93%,
+        38% 90%,
+        47% 87%,
+        84% 71%,
+        34% 86%,
+        30% 84%,
+        64% 70%,
+        19% 79%,
+        54% 69%,
+        0% 33%
+      );
+      background-image: linear-gradient(
+          82deg,
+          rgb(31, 31, 33) 38%,
+          rgba(31, 31, 33, 0) 48%
+        ),
+        linear-gradient(103deg, rgb(31, 31, 33) 40%, rgba(31, 31, 33, 0) 50%);
+    }
+
+    .noface .arm-right {
+      right: 24%;
+      transform: rotate(34deg);
+      clip-path: polygon(
+        69% 0%,
+        26% 0%,
+        15% 10%,
+        34% 24%,
+        0% 70%,
+        59% 93%,
+        62% 90%,
+        53% 87%,
+        16% 71%,
+        66% 86%,
+        70% 84%,
+        36% 70%,
+        81% 79%,
+        46% 69%,
+        100% 33%
+      );
+      -webkit-clip-path: polygon(
+        69% 0%,
+        26% 0%,
+        15% 10%,
+        34% 24%,
+        0% 70%,
+        59% 93%,
+        62% 90%,
+        53% 87%,
+        16% 71%,
+        66% 86%,
+        70% 84%,
+        36% 70%,
+        81% 79%,
+        46% 69%,
+        100% 33%
+      );
+      background-image: linear-gradient(
+          -82deg,
+          rgb(31, 31, 33) 38%,
+          rgba(31, 31, 33, 0) 48%
+        ),
+        linear-gradient(-103deg, rgb(31, 31, 33) 40%, rgba(31, 31, 33, 0) 50%);
+    }
+
+    .chihiro {
+      width: calc(var(--unit) * 145);
+      height: calc(var(--unit) * 412);
+      bottom: 0;
+      left: 26%;
+      z-index: 5;
+    }
+
+    .chihiro .hair-top {
+      z-index: 5;
+      width: calc(var(--unit) * 100);
+      height: calc(var(--unit) * 145);
+      left: 16%;
+      background-color: #35362e;
+      border-radius: 50% 50% 50% 50% / 50% 50% 40% 40%;
+      box-shadow: calc(var(--unit) * -19) calc(var(--unit) * -10)
+        calc(var(--unit) * 1) #21291e inset;
+      clip-path: polygon(
+        100% 0%,
+        106% 22%,
+        86% 100%,
+        86% 44%,
+        84% 35%,
+        82% 48%,
+        71% 29%,
+        68% 43%,
+        66% 51%,
+        59% 27%,
+        54% 45%,
+        48% 22%,
+        37% 43%,
+        38% 27%,
+        32% 39%,
+        30% 35%,
+        30% 28%,
+        15% 48%,
+        14% 35%,
+        14% 46%,
+        12% 56%,
+        13% 47%,
+        16% 65%,
+        19% 91%,
+        13% 82%,
+        14% 84%,
+        4% 57%,
+        1% 37%,
+        0% 0%
+      );
+      -webkit-clip-path: polygon(
+        100% 0%,
+        106% 22%,
+        86% 100%,
+        86% 44%,
+        84% 35%,
+        82% 48%,
+        71% 29%,
+        68% 43%,
+        66% 51%,
+        59% 27%,
+        54% 45%,
+        48% 22%,
+        37% 43%,
+        38% 27%,
+        32% 39%,
+        30% 35%,
+        30% 28%,
+        15% 48%,
+        14% 35%,
+        14% 46%,
+        12% 56%,
+        13% 47%,
+        16% 65%,
+        19% 91%,
+        13% 82%,
+        14% 84%,
+        4% 57%,
+        1% 37%,
+        0% 0%
+      );
+    }
+
+    .chihiro .ponytail {
+      width: calc(var(--unit) * 72);
+      height: calc(var(--unit) * 50);
+      top: 22%;
+      left: 26%;
+      background: rgba(33, 41, 30, 0.95);
+      clip-path: polygon(0 0, 100% 0%, 87% 100%, 13% 100%, 0 0);
+      -webkit-clip-path: polygon(0 0, 100% 0%, 87% 100%, 13% 100%, 0 0);
+    }
+
+    .chihiro .face {
+      width: calc(var(--unit) * 90);
+      height: calc(var(--unit) * 102);
+      top: 5%;
+      left: 19.5%;
+      background-color: #a6917c;
+      border-radius: 20% 20% 50% 47% / 30% 30% 70% 70%;
+      box-shadow: calc(var(--unit) * -22) calc(var(--unit) * 15)
+          calc(var(--unit) * 1) #71645c inset,
+        calc(var(--unit) * -10) calc(var(--unit) * -1) calc(var(--unit) * 1) #71645c
+          inset,
+        0 calc(var(--unit) * 1) calc(var(--unit) * 1) rgba(0, 0, 0, 0.1);
+      z-index: 4;
+      background-image: radial-gradient(
+        circle,
+        rgb(155, 123, 110) 10% 20%,
+        rgba(155, 123, 110, 0) 21%
+      );
+      background-size: 50% 4.5%;
+      background-position: top calc(var(--unit) * 60) left;
+      background-repeat: repeat-x;
+    }
+
+    .chihiro .face .eye {
+      width: calc(var(--unit) * 18);
+      height: calc(var(--unit) * 11);
+      background-color: #9e9995;
+      top: 44%;
+      border-top: calc(var(--unit) * 1) solid #22211c;
+      border-bottom: calc(var(--unit) * 0.5) solid #22211c;
+
+      background-image: radial-gradient(
+          rgb(131, 133, 130) 80%,
+          rgba(131, 133, 130, 0) 81%
+        ),
+        radial-gradient(circle, rgb(19, 21, 20) 72%, rgba(19, 21, 20, 0) 75%);
+      background-size: 10% 20%, 65% 100%;
+      background-repeat: no-repeat;
+      background-position: center left 60%, top center;
+      opacity: 0.84;
+    }
+
+    .chihiro .face .eye-left {
+      left: 16%;
+      border-radius: 46% 50% 36% 32% / 42% 37% 64% 51%;
+    }
+
+    .chihiro .face .eye-right {
+      right: 16%;
+      border-radius: 50% 46% 32% 36% / 37% 42% 51% 64%;
+    }
+
+    .chihiro .eye-left::after,
+    .chihiro .eye-right::after {
+      content: "";
+      width: calc(var(--unit) * 11);
+      height: calc(var(--unit) * 11);
+      border-radius: 35%;
+      left: 18%;
+      bottom: 10%;
+      clip-path: polygon(0 0, 100% 0, 100% 25%, 0% 25%, 0 0);
+      -webkit-clip-path: polygon(0 0, 100% 0, 100% 15%, 0% 15%, 0 0);
+      border-top: calc(var(--unit) * 0.2) solid #22211c;
+      opacity: 0.8;
+    }
+
+    .chihiro .face .eyebrow {
+      width: calc(var(--unit) * 18);
+      height: calc(var(--unit) * 11);
+      top: 37%;
+
+      border-top: calc(var(--unit) * 1) solid #5d4d40;
+    }
+
+    .chihiro .face .eyebrow-left {
+      left: 15%;
+      border-radius: 50% / 40% 20% 80% 60%;
+    }
+
+    .chihiro .face .eyebrow-right {
+      right: 15%;
+      border-radius: 50% / 20% 40% 60% 80%;
+    }
+
+    .chihiro .face .nose {
+      width: calc(var(--unit) * 9);
+      height: calc(var(--unit) * 3);
+      background-image: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0) 5%,
+          rgba(34, 33, 28, 0.5) 6% 20%,
+          rgba(255, 255, 255, 0) 21%
+        ),
+        linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0) 5%,
+          rgba(34, 33, 28, 0.5) 6% 20%,
+          rgba(255, 255, 255, 0) 21%
+        );
+      top: 60%;
+      left: 48%;
+    }
+
+    .chihiro .face .mouth {
+      width: calc(var(--unit) * 19);
+      height: calc(var(--unit) * 6);
+      top: 81%;
+      left: 42%;
+      border-radius: 20%;
+      border-top: calc(var(--unit) * 1) solid #22211c;
+      border-bottom: calc(var(--unit) * 1) solid #22211c;
+      clip-path: polygon(0 0, 100% 0%, 60% 100%, 40% 100%, 0 0);
+      -webkit-clip-path: polygon(
+        0 0,
+        100% 0%,
+        100% 50%,
+        60% 100%,
+        40% 100%,
+        0 50%,
+        0 0
+      );
+      opacity: 0.8;
+    }
+
+    .chihiro .body {
+      width: 100%;
+      height: calc(var(--unit) * 300);
+      bottom: 0%;
+      left: 0%;
+    }
+
+    .chihiro .neck {
+      width: calc(var(--unit) * 29);
+      height: calc(var(--unit) * 31.5);
+      left: 41%;
+      z-index: 3;
+      filter: drop-shadow(0 calc(var(--unit) * 2) calc(var(--unit) * 1) #4b583e);
+    }
+
+    .neck::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(50deg, #a6917c 35%, #71645c 42%);
+      -webkit-clip-path: polygon(
+        10% 0,
+        5% 50%,
+        48% 100%,
+        65% 100%,
+        95% 50%,
+        90% 0,
+        10% 0
+      );
+      clip-path: polygon(10% 0, 5% 50%, 45% 100%, 65% 100%, 95% 50%, 90% 0, 10% 0);
+    }
+
+    .chihiro .collar {
+      z-index: 2;
+      width: calc(var(--unit) * 42);
+      height: calc(var(--unit) * 40);
+      top: 2%;
+      left: 36.5%;
+      filter: drop-shadow(0 calc(var(--unit) * 3) calc(var(--unit) * 1) #4b583e)
+        drop-shadow(0 calc(var(--unit) * -2.5) calc(var(--unit) * 1) #4b583e);
+    }
+
+    .chihiro .collar::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: #577657;
+      background: linear-gradient(55deg, #577657 60%, #384d3e 65%);
+      border-radius: 50% 50% 40% 60%/ 20% 15% 80% 85%;
+      clip-path: polygon(0 0, 0 30%, 45% 100%, 65% 100%, 100% 30%, 100% 0, 0 0);
+      -webkit-clip-path: polygon(
+        0 0,
+        0 30%,
+        45% 100%,
+        65% 100%,
+        100% 30%,
+        100% 0,
+        0 0
+      );
+    }
+
+    .chihiro .body .chest {
+      width: calc(var(--unit) * 145);
+      height: calc(var(--unit) * 210);
+      background-repeat: no-repeat;
+      background-position: top center;
+      background-size: calc(var(--unit) * 3500) calc(var(--unit) * 400);
+      background-image: radial-gradient(
+        circle at top,
+        #93a49a 4%,
+        #547958 4.2% 8%,
+        #93a49a 8.2%
+      );
+      left: 0%;
+      top: 5%;
+      z-index: 1;
+      clip-path: polygon(
+        65% 0%,
+        80% 3%,
+        85% 11%,
+        82% 21%,
+        81% 46%,
+        86% 69%,
+        86% 92%,
+        75% 87%,
+        64% 86%,
+        25% 90%,
+        18% 92%,
+        15% 94%,
+        12% 100%,
+        8% 91%,
+        14% 63%,
+        16% 49%,
+        15% 8%,
+        21% 4%,
+        35% 0%,
+        65% 0%
+      );
+
+      -webkit-clip-path: polygon(
+        65% 0%,
+        80% 3%,
+        85% 11%,
+        82% 21%,
+        81% 46%,
+        86% 69%,
+        86% 92%,
+        75% 87%,
+        64% 86%,
+        25% 90%,
+        18% 92%,
+        15% 94%,
+        12% 100%,
+        8% 91%,
+        14% 63%,
+        16% 49%,
+        15% 8%,
+        21% 4%,
+        35% 0%,
+        65% 0%
+      );
+    }
+
+    .chihiro .body .chest::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: rgba(50, 50, 50, 0.3);
+      clip-path: polygon(
+        13% 70%,
+        7% 78%,
+        8% 81%,
+        0% 91%,
+        27% 84%,
+        57% 81%,
+        73% 81%,
+        100% 86%,
+        87% 79%,
+        100% 66%,
+        77% 30%,
+        63% 47%,
+        61% 50%,
+        53% 63%,
+        45% 61%,
+        24% 47%
+      );
+      -webkit-clip-path: polygon(
+        13% 70%,
+        7% 78%,
+        8% 81%,
+        0% 91%,
+        27% 84%,
+        57% 81%,
+        73% 81%,
+        100% 86%,
+        87% 79%,
+        100% 66%,
+        77% 30%,
+        63% 47%,
+        61% 50%,
+        53% 63%,
+        45% 61%,
+        24% 47%
+      );
+    }
+
+    .chihiro .body .chest::before {
+      content: "";
+      width: calc(var(--unit) * 50);
+      height: calc(var(--unit) * 30);
+      top: 65%;
+      left: 30%;
+      transform: rotate(-190deg);
+      border-radius: 15%;
+      border-top: calc(var(--unit) * 1) solid rgba(99, 115, 105, 0.7);
+    }
+
+    .chihiro .arm {
+      z-index: 4;
+      width: calc(var(--unit) * 28);
+      background-color: #a5917e;
+      transform: rotate(-35deg);
+      clip-path: polygon(
+        100% 0%,
+        82% 36%,
+        75% 60%,
+        98% 83%,
+        100% 100%,
+        0% 100%,
+        15% 81%,
+        22% 72%,
+        21% 43%,
+        0% 0%
+      );
+      -webkit-clip-path: polygon(
+        100% 0%,
+        82% 36%,
+        75% 60%,
+        98% 83%,
+        100% 100%,
+        0% 100%,
+        15% 81%,
+        22% 72%,
+        21% 43%,
+        0% 0%
+      );
+      overflow: hidden;
+    }
+
+    .chihiro .arm-left {
+      top: 49%;
+      height: calc(var(--unit) * 104);
+      left: 24.5%;
+      border-radius: 0% 100% 50% 50% / 0% 25% 50% 50%;
+      box-shadow: calc(var(--unit) * 4) 0px calc(var(--unit) * 2)
+        rgba(112, 94, 75, 0.25) inset;
+    }
+
+    .chihiro .arm-right {
+      top: 48.5%;
+      height: calc(var(--unit) * 110);
+      border-radius: 100% 0% 30% 45% / 25% 0% 50% 50%;
+      right: 18.5%;
+      transform: rotate(36deg);
+      box-shadow: calc(var(--unit) * 4) 0px calc(var(--unit) * 1)
+          rgba(112, 94, 75, 0.15) inset,
+        -3px 3px 1px rgba(113, 101, 94, 0.2) inset;
+    }
+
+    .chihiro .arm-left::after {
+      content: "";
+      width: 1%;
+      height: 1%;
+      border-bottom: calc(var(--unit) * 25) solid rgba(0, 0, 0, 0);
+      border-left: calc(var(--unit) * 30) solid rgba(113, 101, 94, 0.4);
+      border-radius: 0% 100% 0% 0% / 0% 100% 0% 0%;
+    }
+
+    .chihiro .arm-right::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: rgba(113, 101, 94, 0.4);
+      -webkit-clip-path: polygon(
+        66% 2%,
+        42% 5%,
+        57% 29%,
+        56% 38%,
+        49% 60%,
+        66% 66%,
+        100% 62%,
+        100% 0%
+      );
+      clip-path: polygon(
+        66% 2%,
+        42% 5%,
+        57% 29%,
+        56% 38%,
+        49% 60%,
+        66% 66%,
+        100% 62%,
+        100% 0%
+      );
+    }
+
+    .chihiro .arm-right::before {
+      content: "";
+      width: 100%;
+      height: 16.5%;
+      bottom: 0;
+      background-repeat: repeat-x;
+      background-image: linear-gradient(
+        to right,
+        rgba(112, 94, 75, 0) 90%,
+        rgba(112, 94, 75, 0.6) 91%
+      );
+      background-size: 23% 100%;
+      background-position: top left 45%;
+    }
+
+    .chihiro .shorts {
+      width: calc(var(--unit) * 104);
+      height: calc(var(--unit) * 70);
+      background-color: #8b4f5b;
+      top: 59%;
+      left: 13%;
+      border-radius: 0% 0% 50% 50% / 90% 90% 20% 15%;
+      border: calc(var(--unit) * 1) solid #4d2229;
+      background-repeat: no-repeat;
+      background-position: bottom right -15%, bottom left;
+      background-size: 70% 98%, 65% 98%, 100% 100%;
+      background-image: radial-gradient(
+          circle at bottom,
+          rgba(56, 40, 41, 0.75) 38%,
+          rgba(77, 34, 41, 0.8) 39% 40%,
+          rgba(77, 34, 41, 0) 41%
+        ),
+        radial-gradient(
+          circle at bottom,
+          rgba(56, 40, 41, 0.75) 38%,
+          rgba(77, 34, 41, 0.8) 39% 40%,
+          rgba(77, 34, 41, 0) 41%
+        ),
+        linear-gradient(
+          to right,
+          rgba(67, 41, 44, 0) 50%,
+          rgba(67, 41, 44, 0.6) 50.5% 52%,
+          rgba(67, 41, 44, 0) 52.5% 55%,
+          rgba(67, 41, 44, 0.6) 55.5% 57%,
+          rgba(67, 41, 44, 0) 54.5%
+        );
+    }
+
+    .chihiro .leg {
+      width: calc(var(--unit) * 40);
+      height: calc(var(--unit) * 88);
+      background-color: #a69382;
+      top: 72.75%;
+      -webkit-clip-path: polygon(
+        100% 0%,
+        100% 40%,
+        96% 63%,
+        95% 72%,
+        88% 100%,
+        5% 100%,
+        13% 65%,
+        22% 46%,
+        19% 38%,
+        16% 31%,
+        17% 33%,
+        0% 0%,
+        100% 0
+      );
+      clip-path: polygon(
+        100% 0%,
+        100% 40%,
+        96% 63%,
+        95% 72%,
+        88% 100%,
+        5% 100%,
+        13% 65%,
+        22% 46%,
+        19% 38%,
+        16% 31%,
+        17% 33%,
+        0% 0%,
+        100% 0
+      );
+      overflow: hidden;
+    }
+
+    .chihiro .leg-left {
+      left: 23%;
+      border-radius: 50% 50% 0 0 / 15% 10% 0 0;
+    }
+
+    .chihiro .leg-right {
+      right: 20%;
+      border-radius: 50% 50% 0 0 / 25% 10% 0 0;
+      transform: rotateY(180deg);
+    }
+
+    .chihiro .leg-left::after,
+    .chihiro .leg-right::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: rgba(113, 101, 94, 0.4);
+      clip-path: polygon(
+        29% 23%,
+        29% 36%,
+        27% 45%,
+        23% 54%,
+        23% 62%,
+        25% 73%,
+        25% 82%,
+        36% 83%,
+        37% 2%,
+        23% 2%
+      );
+    }
+
+    .chihiro .leg-right::after {
+      -webkit-clip-path: polygon(
+        0% 32%,
+        1% 66%,
+        33% 50%,
+        0% 63%,
+        10% 85%,
+        0% 100%,
+        31% 100%,
+        46% 76%,
+        66% 46%,
+        56% 18%,
+        74% 0%,
+        0% 0%
+      );
+      clip-path: polygon(
+        0% 32%,
+        1% 66%,
+        33% 50%,
+        0% 63%,
+        10% 85%,
+        0% 100%,
+        31% 100%,
+        46% 76%,
+        66% 46%,
+        56% 18%,
+        74% 0%,
+        0% 0%
+      );
+    }
+
+    .chihiro .leg-left::after {
+      -webkit-clip-path: polygon(
+        100% 68%,
+        99% 34%,
+        67% 50%,
+        100% 37%,
+        100% 20%,
+        100% 0%,
+        64% 0%,
+        72% 27%,
+        53% 66%,
+        54% 81%,
+        64% 100%,
+        100% 100%
+      );
+      clip-path: polygon(
+        100% 68%,
+        99% 34%,
+        67% 50%,
+        100% 37%,
+        100% 20%,
+        100% 0%,
+        64% 0%,
+        72% 27%,
+        53% 66%,
+        54% 81%,
+        64% 100%,
+        100% 100%
+      );
+    }
+
+    .chihiro .sleeve {
+      z-index: 4;
+      width: calc(var(--unit) * 44);
+      height: calc(var(--unit) * 147);
+      background-repeat: no-repeat;
+      background-position: top calc(var(--unit) * 100) right, bottom right;
+      background-size: 91% 100%, 100% 400%;
+      background-image: radial-gradient(
+          circle,
+          #4d5850 45%,
+          rgba(69, 70, 64, 0.85) 46.5% 47.5%,
+          rgba(69, 70, 64, 0) 48.5%
+        ),
+        radial-gradient(
+          circle at bottom,
+          #93a49a 5.5%,
+          #547958 6% 12.5%,
+          #93a49a 13%
+        );
+      top: 6.5%;
+      overflow: hidden;
+      border-width: calc(var(--unit) * 1);
+      border-style: solid;
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+    }
+
+    .chihiro .sleeve-left {
+      border-radius: 100% 0% 50% 50% / 80% 0% 5% 5%;
+      left: -1.5%;
+      border-image: linear-gradient(
+          to bottom,
+          rgba(46, 69, 53, 0) 25%,
+          rgba(46, 69, 53, 0.6) 30% 96%,
+          rgba(46, 69, 53, 0) 97%
+        )
+        0 100% 0 0;
+    }
+
+    .chihiro .sleeve-right {
+      right: -6%;
+      border-radius: 0% 100% 50% 50% / 0% 80% 5% 5%;
+      border-image: linear-gradient(
+          to bottom,
+          rgba(46, 69, 53, 0) 25%,
+          rgba(46, 69, 53, 0.6) 30% 96%,
+          rgba(46, 69, 53, 0) 97%
+        )
+        0 0 0 100%;
+    }
+
+    .chihiro .sleeve-left::after,
+    .chihiro .sleeve-right::after {
+      content: "";
+      width: calc(var(--unit) * 20);
+      height: calc(var(--unit) * 30);
+      top: 25%;
+
+      border-radius: 0 15% 5% 0;
+    }
+
+    .chihiro .sleeve-left::after {
+      left: 35%;
+      border-right: calc(var(--unit) * 1) solid rgba(99, 115, 105, 0.7);
+      transform: rotate(-8deg);
+    }
+
+    .chihiro .sleeve-right::after {
+      transform: rotate(8deg);
+      left: 20%;
+      border-left: calc(var(--unit) * 1) solid rgba(99, 115, 105, 0.7);
+    }
+
+    .chihiro .sleeve-left::before {
+      z-index: 3;
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+          circle at bottom,
+          #93a49a 18%,
+          rgba(113, 101, 94, 1) 18.2% 18.6%,
+          rgba(113, 101, 94, 0) 18.7%
+        ),
+        linear-gradient(
+          35deg,
+          rgba(113, 101, 94, 1) 22%,
+          rgba(48, 81, 62, 0.5) 22.5%
+        );
+      -webkit-clip-path: polygon(
+        100% 48%,
+        100% 95%,
+        41% 82%,
+        80% 71%,
+        88% 64%,
+        100% 48%
+      );
+      clip-path: polygon(100% 48%, 100% 95%, 41% 82%, 80% 71%, 88% 64%, 100% 48%);
+    }
+
+    .chihiro .sleeve-right::before {
+      z-index: 3;
+      content: "";
+      width: 100%;
+      height: 100%;
+      background-color: rgba(48, 81, 62, 0.5);
+      clip-path: polygon(
+        32% 96%,
+        0% 100%,
+        0% 0%,
+        15% 30%,
+        28% 74%,
+        47% 95%,
+        22% 96%,
+        13% 76%
+      );
+      -webkit-clip-path: polygon(
+        32% 96%,
+        0% 100%,
+        0% 0%,
+        15% 30%,
+        28% 74%,
+        47% 95%,
+        22% 96%,
+        13% 76%
+      );
+      transform: rotateY(180deg);
+    }
+
+    .chihiro .leg::before {
+      content: "";
+      width: 85%;
+      height: 22%;
+      top: 32%;
+      border-radius: 14%;
+    }
+
+    .chihiro .leg-left::before {
+      border-right: calc(var(--unit) * 1) solid rgba(34, 33, 28, 0.45);
+    }
+
+    .chihiro .leg-right::before {
+      right: -20%;
+      border-left: calc(var(--unit) * 1) solid rgba(34, 33, 28, 0.45);
+    }
+
+  </style>  
+</head>
+<body>
+
+  <div class="container">
+    <div class="background">
+      <div class="water"></div>
+      <div class="sky">
+        <div class="clouds">
+          <div class="cloud cloud1"></div>
+          <div class="cloud cloud2"></div>
+        </div>
+      </div>
+      <div class="reflection">
+        <div class="clouds">
+          <div class="cloud cloud1"></div>
+          <div class="cloud cloud2"></div>
+        </div>
+      </div>
+    </div>
+    <div class="train">
+      <div class="handle handle1"></div>
+      <div class="handle handle2"></div>
+      <div class="handle handle3"></div>
+      <div class="handle handle4"></div>
+      <div class="handle handle5"></div>
+      <div class="windows"></div>
+      <div class="seats"></div>
+      <div class="chihiro">
+        <div class="hair-top"></div>
+        <div class="ponytail"></div>
+        <div class="face">
+          <div class="eyebrow eyebrow-left"></div>
+          <div class="eyebrow eyebrow-right"></div>
+          <div class="eye eye-left"></div>
+          <div class="eye eye-right"></div>
+          <div class="nose"></div>
+          <div class="mouth"></div>
+        </div>
+        <div class="body">
+          <div class="neck"></div>
+          <div class="collar"></div>
+          <div class="chest"></div>
+          <div class="sleeve sleeve-right"></div>
+          <div class="sleeve sleeve-left"></div>
+          <div class="arm arm-left"></div>
+          <div class="arm arm-right"></div>
+          <div class="shorts"></div>
+          <div class="leg leg-left"></div>
+          <div class="leg leg-right"></div>
+        </div>
+      </div>
+      <div class="noface">
+        <div class="mask">
+          <div class="eye eye-left"></div>
+          <div class="eye eye-right"></div>
+          <div class="mouth"></div>
+          <div class="stripe-top stripe-top-left"></div>
+          <div class="stripe-bottom stripe-bottom-left"></div>
+          <div class="stripe-top stripe-top-right"></div>
+          <div class="stripe-bottom stripe-bottom-right"></div>
+        </div>
+        <div class="arm arm-left"></div>
+        <div class="arm arm-right"></div>
+      </div>
+    </div>
+  </div>
+  <!-- clouds filter -->
+  <svg width="0" height="0">
+    <filter id="filter">
+      <feTurbulence type="fractalNoise" baseFrequency=".01" numOctaves="15" seed="700" />
+      <feDisplacementMap in="SourceGraphic" scale="120" />
+    </filter>
+  </svg>
+  
+  <script type="text/javascript">
+
+  </script>
+</body>
+</html>

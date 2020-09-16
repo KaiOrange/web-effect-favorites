@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Three.js 花瓣</title>
+  <style>
+    canvas {
+      width: 100%;
+      height: 100vh;
+      display: block;
+      cursor: grab;
+    }
+
+    a {
+      display: block;
+      padding: 5vmin;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+  </style>  
+</head>
+<body>
+
+  <script src='https://cdn.jsdelivr.net/npm/three@0.99.0/build/three.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/three@0.99.0/examples/js/controls/OrbitControls.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.0/gsap.min.js'></script>
+  
+  <script type="text/javascript">
+    // 作者：https://twitter.com/ycwhk
+    // ----
+    // Boot
+    // ----
+    const $ = THREE;
+    const OrbitControls = $.OrbitControls;
+
+    const renderer = new $.WebGLRenderer({ antialias: true });
+    const scene = new $.Scene();
+    const camera = new $.PerspectiveCamera(100, 2, .01, 100);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    window.addEventListener('resize', () => {
+        const { clientWidth, clientHeight } = renderer.domElement;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(clientWidth, clientHeight, false);
+        camera.aspect = clientWidth / clientHeight;
+        camera.updateProjectionMatrix();
+    });
+    document.body.prepend(renderer.domElement);
+    window.dispatchEvent(new Event('resize'));
+    renderer.setAnimationLoop(t => {
+        renderer.render(scene, camera);
+        controls.update();
+    });
+
+    // +-----
+    // Canvas
+    // -----+
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath(); 
+    ctx.ellipse(canvas.width / 2, 0, canvas.width / 4, canvas.height / 4, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = '#53d9d1';
+    ctx.lineWidth = 32;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(canvas.width, 0);
+    ctx.lineTo(0, canvas.height);
+    ctx.strokeStyle = '#f27b9b';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(0, canvas.height / 2, canvas.width / 4, canvas.height / 4, 0, 0, Math.PI * 2);
+    ctx.lineWidth = 16;
+    ctx.strokeStyle = '#eb7132';
+    ctx.stroke();
+
+    // ----
+    // Main
+    // ----
+
+    camera.position.set(4, 2, 4);
+    scene.background = new $.Color('white');
+    renderer.shadowMap.enabled = true;
+
+    const light = new $.DirectionalLight();
+    light.position.set(0, 8, 0);
+    light.castShadow = true;
+    scene.add(light);
+
+    const r = 4;
+    const h = 2;
+    const geom = new $.ConeBufferGeometry(r, h, 64, 64, true);
+    geom.translate(0, -h / 2 - 0.001, 0);
+    const map = new $.CanvasTexture(canvas);
+    map.repeat.set(4 * 2, 2);
+    map.wrapS = $.MirroredRepeatWrapping;
+    map.wrapT = $.MirroredRepeatWrapping;
+    map.needsUpdate = true;
+    const mat = new $.MeshLambertMaterial({ map, alphaTest: 0.5, transparent: true, side: $.DoubleSide });
+    const mesh = new $.Mesh(geom, mat);
+    mesh.customDepthMaterial = new $.MeshDepthMaterial({ depthPacking: $.RGBADepthPacking, alphaTest: mat.alphaTest, map: mat.map });
+    mesh.castShadow = true;
+
+    const t0 = new $.Group();
+    t0.add(mesh);
+    t0.rotation.z = Math.PI / 2 + Math.atan2(r, h);
+    const t1 = new $.Group();
+    t1.add(t0);
+    scene.add(t1);
+
+    //// Ground
+
+    {
+        const geom = new $.PlaneBufferGeometry(16, 16);
+        geom.rotateX(-Math.PI / 2);
+        const mat = new $.ShadowMaterial({ transparent: true, opacity: 0.2 });
+        const mesh = new $.Mesh(geom, mat);
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+    }
+
+    //// Animate
+
+    gsap.timeline({ defaults: { duration: 3, ease: 'none' }, repeat: -1 })
+        .to(mesh.rotation, { y: Math.PI * 2 })
+        .to(t1.rotation, { y: Math.PI * 2 }, '<');
+  </script>
+</body>
+</html>

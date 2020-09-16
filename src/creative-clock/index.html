@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>创意时钟</title>
+  <style>
+    *:before, *:after {
+      content: '';
+      position: absolute;
+    }
+
+    .app {
+      width: fit-content;
+      height: 100%;
+      margin: auto;
+      border-radius: 1rem;
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .app, .row {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .clock {
+      width: 1.5rem;
+      height: 1.5rem;
+      background: lightgray;
+      border-radius: 50%;
+      position: relative;
+    }
+    .clock:before, .clock:after {
+      transform: translate(-50%) rotate(var(--angleFrom));
+      background: black;
+      left: 50%;
+      transform-origin: bottom center;
+      transition: 1s;
+      width: 0.1rem;
+      height: 50%;
+      border-radius: 5px;
+      animation: var(--time) changeColor linear var(--delay) infinite;
+    }
+    .clock:before {
+      transform: rotate(var(--bigAngle));
+    }
+    .clock:after {
+      transform: rotate(var(--smallAngle));
+    }
+
+    @keyframes changeColor {
+      from {
+        transform: rotate(var(--angleFrom));
+      }
+      to {
+        transform: rotate(var(--angleTo));
+      }
+    }
+
+  </style>  
+</head>
+<body>
+
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js" integrity="sha512-Wnnn8nQFVZWAtirS0eVahQnmKyUXgBbDUnDapclzAk1RAF7GdsVdp7VrCS9M9qgkqL9uSI2mR+6jNmiZLbuhWA==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.10.2/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.10.2/umd/react-dom.production.min.js"></script>
+
+  <script type="text/babel">
+    console.clear();
+
+    const Clock = (props) => {
+      return (
+        <div class="clock" style = {
+            {
+              "--smallAngle": props.small * 30 + "deg",
+              "--bigAngle": props.big * 30 + "deg",
+                
+              "--angleFrom": props.angleFrom * 30 + "deg",
+              "--angleTo": props.angleTo * 30 + "deg",
+              "--time": props.time + "s",
+              "--delay": props.delay + "s"
+            }
+          }></div>
+      )
+    }
+
+    const ClockNumber = (props)=>{
+      const clearState = [11,11];
+      const states = {
+        "|": [0,6],
+        "|_": [0,3],
+        "_|": [9,0],
+        "-|": [9,6],
+        "|-": [3,6],
+        "-": [9,3],
+        "n": clearState,
+      }
+      const topLeft = [9,6];
+      const NUMBERS = [
+        [//0
+          ["|-", "-", "-", "-|"],
+          ["|", "|-", "-|", "|"],
+          ["|", "|", "|", "|"],
+          ["|", "|", "|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//1
+          ["n", "|-", "-", "-|"],
+          ["n", "|_", "-|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|_", "_|"],
+        ],
+        [//2
+          ["|-", "-", "-", "-|"],
+          ["|_", "-", "-|", "|"],
+          ["|-", "-", "_|", "|"],
+          ["|", "|-", "-", "_|"],
+          ["|", "|_", "-", "-|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//3
+          ["|-", "-", "-", "-|"],
+          ["|_", "-", "-|", "|"],
+          ["|-", "-", "_|", "|"],
+          ["|_", "-", "-|", "|"],
+          ["|-", "-", "_|", "|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//4
+          ["|-", "-|", "|-", "-|"],
+          ["|", "|", "|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|_", "-", "-|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|_", "_|"],
+        ],
+        [//5
+          ["|-", "-", "-", "-|"],
+          ["|", "|-", "-", "_|"],
+          ["|", "|_", "-", "-|"],
+          ["|_", "-", "-|", "|"],
+          ["|-", "-", "_|", "|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//6
+          ["|-", "-", "-", "-|"],
+          ["|", "|-", "-", "_|"],
+          ["|", "|_", "-", "-|"],
+          ["|", "|-", "-|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//7
+          ["|-", "-", "-", "-|"],
+          ["|_", "-", "-|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|_", "_|"],
+        ],
+        [//8
+          ["|-", "-", "-", "-|"],
+          ["|", "|-", "-|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|", "|-", "-|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|_", "-", "-", "_|"],
+        ],
+        [//9
+          ["|-", "-", "-", "-|"],
+          ["|", "|-", "-|", "|"],
+          ["|", "|_", "_|", "|"],
+          ["|_", "-", "-|", "|"],
+          ["n", "n", "|", "|"],
+          ["n", "n", "|_", "_|"],
+        ],
+        [//9
+          ["n", "n", "n", "n"],
+          ["n", "|-", "-|", "n"],
+          ["n", "|_", "_|", "n"],
+          ["n", "|-", "-|", "n"],
+          ["n", "|_", "_|", "n"],
+          ["n", "n", "n", "n"],
+        ],
+      ]
+
+      const number = NUMBERS[props.number];
+      return (
+        <div>
+          {
+            number.map(row=>{
+              return (
+                <div class="row">{row.map(clock => {
+                  return (
+                    <Clock small={states[clock][0] | null} big={states[clock][1] | null}/>
+                  )
+                })}</div>
+              )
+            })
+          } 
+        </div>
+      )
+    }
+
+    const App = ()=>{
+      const [distance, setDistance] = React.useState(1);
+      const MAX_CLOCKS = 200;  
+      const MAX_CLOCKS_COLS = 10;
+      const CLOCKS = [];
+      const rows = [];
+      
+      for(let i = 0; i < MAX_CLOCKS_COLS; i++){
+          CLOCKS.push(
+            <Clock 
+              angleFrom={(i - 1 + i - 2)} 
+              angleTo={i + (i - 1 + i - 2)} 
+              time={5} 
+              delay={0}
+              />
+          );
+      }
+      
+      const [hour, setHour] = React.useState(["0","0","0","0","0","0"]);
+      
+      setTimeout(()=>{
+        setHour(getArrHour(new Date()));
+        // setHour(["5","5","1","1","0","5"]);
+      }, 1000);
+      
+      const getArrHour = (date) => {
+        const time = [
+          date.getHours().toString()[1]?date.getHours().toString()[0]:0,
+          date.getHours().toString()[1] || date.getHours().toString()[0],
+          date.getMinutes().toString()[1]?date.getMinutes().toString()[0]:0,
+          date.getMinutes().toString()[1] || date.getMinutes().toString()[0],
+          date.getSeconds().toString()[1]?date.getSeconds().toString()[0]:0,
+          date.getSeconds().toString()[1] || date.getSeconds().toString()[0],
+        ];
+        console.log(date.getHours().toString()[1]);
+        return time; 
+      };
+      
+      const TIME = [
+        <ClockNumber number={hour[0]}/>,
+        <ClockNumber number={hour[1]}/>,
+        <ClockNumber number="10"/>,
+        <ClockNumber number={hour[2]}/>,
+        <ClockNumber number={hour[3]}/>,
+        <ClockNumber number="10"/>,
+        <ClockNumber number={hour[4]}/>,
+        <ClockNumber number={hour[5]}/>
+      ]
+      
+      return (
+        <div class="app">
+          {TIME}
+        </div>
+      )
+    }
+
+    ReactDOM.render(<App />, document.querySelector('#root'));
+  </script>
+</body>
+</html>

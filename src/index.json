@@ -56,9 +56,34 @@
       "link": "/web-effect-favorites/css-glass-beads/"
     },
     {
+      "title": "纯CSS水滴效果",
+      "img": "/web-effect-favorites/assets/images/css-dropplets.png",
+      "link": "/web-effect-favorites/css-dropplets/"
+    },
+    {
+      "title": "纯CSS千与千寻插画",
+      "img": "/web-effect-favorites/assets/images/css-spirited-away.png",
+      "link": "/web-effect-favorites/css-spirited-away/"
+    },
+    {
+      "title": "纯CSS划船效果",
+      "img": "/web-effect-favorites/assets/images/css-summer-dream.png",
+      "link": "/web-effect-favorites/css-summer-dream/"
+    },
+    {
+      "title": "文字旋转",
+      "img": "/web-effect-favorites/assets/images/text-tornado.png",
+      "link": "/web-effect-favorites/text-tornado/"
+    },
+    {
       "title": "3D时钟",
       "img": "/web-effect-favorites/assets/images/3D-clock.png",
       "link": "/web-effect-favorites/3D-clock/"
+    },
+    {
+      "title": "创意时钟",
+      "img": "/web-effect-favorites/assets/images/creative-clock.png",
+      "link": "/web-effect-favorites/creative-clock/"
     },
     {
       "title": "粒子爆炸",
@@ -129,6 +154,21 @@
       "title": "线状文字",
       "img": "/web-effect-favorites/assets/images/wire-typo.png",
       "link": "/web-effect-favorites/wire-typo/"
+    },
+    {
+      "title": "Three.js 花瓣",
+      "img": "/web-effect-favorites/assets/images/petals.png",
+      "link": "/web-effect-favorites/petals/"
+    },
+    {
+      "title": "球体吸附效果",
+      "img": "/web-effect-favorites/assets/images/spheres-adsorbent.png",
+      "link": "/web-effect-favorites/spheres-adsorbent/"
+    },
+    {
+      "title": "圆锥文字",
+      "img": "/web-effect-favorites/assets/images/text-cone.png",
+      "link": "/web-effect-favorites/text-cone/"
     }
   ] 
 }
