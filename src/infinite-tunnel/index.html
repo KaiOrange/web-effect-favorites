@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>无限隧道</title>
+  <style>
+    body,html{width:100%;height:100%;padding:0;margin:0;overflow: hidden;}
+  </style>  
+</head>
+<body>
+
+  <!-- My scene -->
+  <canvas id="scene"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js" ></script>
+  
+  <script type="text/javascript">
+    /*
+      * 作者信息：
+      * Infinite tunnel - @Louis Hoebregts
+      */
+
+    var ww = window.innerWidth,
+    wh = window.innerHeight;
+
+    function init(){
+
+      /* WEBGL RENDERER */
+      renderer = new THREE.WebGLRenderer({canvas : document.getElementById('scene')});
+      renderer.setSize(ww,wh);
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(50, ww/wh, 1, 10000 );
+      scene.add(camera);
+
+
+      light = new THREE.PointLight(0xffffff, 1, 1300);
+      light.position.set( 0, 0, -750 );
+      scene.add(light);
+
+      createBox();
+
+      animate();
+
+    };
+
+    function createBox(){
+      
+      elements = new THREE.Object3D();
+
+      var colors = [
+        new THREE.Color( 0x2cc6e5 ),
+        new THREE.Color( 0x91f4f4 ),
+        new THREE.Color( 0xe6a09e ),
+        new THREE.Color( 0x1071ac )
+      ];
+
+      var geometry = new THREE.BoxGeometry(50,50,150);
+      var translate = new THREE.Matrix4().makeTranslation(150,0,0);
+
+      for(var i=0;i<14;i++){
+        var circle = new THREE.Object3D();
+        for(var j=0;j<13;j++){
+          var material = new THREE.MeshLambertMaterial({color: colors[i%4]});
+          var cube = new THREE.Mesh(geometry, material);
+          var rotation =  new THREE.Matrix4().makeRotationZ(Math.PI*2/13*j);
+          cube.applyMatrix( new THREE.Matrix4().multiplyMatrices(rotation, translate) );
+          circle.add(cube);
+        }
+        circle.position.z = -i*180;
+        elements.add(circle);
+      }
+      farest = -13*180;
+      scene.add(elements);
+
+      renderer.render(scene, camera);
+
+    };
+
+    var counter = 0;
+    var animate = function () {
+      requestAnimationFrame(animate);
+
+      for(var i=0;i<14;i++){
+        var circle = elements.children[i];
+        if(camera.position.z <= circle.position.z){
+          farest-=180;
+          circle.position.z = farest;
+        }
+      }
+      camera.rotation.z += .005;
+      camera.position.z -= 7;
+      light.position.z -= 7;
+      light.position.y = Math.sin(counter/50)*75;
+      light.position.x = Math.cos(counter/50)*75;
+      counter++;
+
+      renderer.render(scene, camera);
+    };
+
+    init();
+
+  </script>
+  
+</body>
+</html>
