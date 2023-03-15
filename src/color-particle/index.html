@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4"
+    />
+    <title>彩色粒子</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #000;
+        overflow: hidden;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"
+      integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="text/javascript">
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      let n = 1200;
+      let ps= [];
+      function setup() {
+        createCanvas(w, h);   
+        for (let i = 0; i < n; i++) 
+          ps[i]= new p5.Vector(random(w), random(h));
+        background(0);
+        colorMode(HSB, 360, 100, 100, 255);
+      }
+      function draw() {
+        fill(0, 4);
+        noStroke();
+        rect(0, 0, w, h);
+        stroke(255);
+        let f1= 0.015 * frameCount;  
+        let f2= 0.01 * frameCount;   
+        for (let i = 0; i < n; i++) {
+          let p = ps[i];
+          let theta = noise( 0.003*p.x , 0.003*p.y )*4*PI;  
+          let a = new p5.Vector(cos(theta), sin(theta) );
+          let b = new p5.Vector(cos(f1), cos(f2) );
+          let v = p5.Vector.lerp(a,b,0.4);
+          p.add(v);
+          if (0.005 > random(1.0) || p.x < 0 || p.x > w || p.y < 0 || p.y > h)
+            ps[i]= new p5.Vector(random(w), random(h)); 
+          let mag= v.mag();
+          strokeWeight(1 + 0.6/(0.01+mag));  
+          stroke(100*mag, 255, 255);
+          point(p.x, p.y);
+        }
+        //  if(0==frameCount%12)
+        //  saveFrame("####.jpg");
+      }
+    </script>
+  </body>
+</html>

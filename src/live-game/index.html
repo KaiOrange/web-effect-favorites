@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4"
+    />
+    <title>生存游戏</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"
+      integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="text/javascript">
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      let hw = Math.floor(w / 2);
+      let hh = Math.floor(h / 2);
+      let d = createArray(hh, hw);
+      function createArray(i, j) {
+        let arr = new Array(i);
+        arr.fill(0);
+        arr = arr.map((item) => {
+          let arr2 = new Array(j);
+          arr2.fill(0);
+          return arr2;
+        });
+        return arr;
+      }
+      function setup() {
+        createCanvas(w, h);   
+        let a = 166; 
+        for (let i=a; i< hh-a; i++) 
+          for (let j=a; j< hw-a; j++) 
+            d[i][j]=1;
+      }
+      function draw() {
+        background(255);
+        noStroke();
+        fill(0);
+        let c = createArray(hh, hw);
+        for (let i=1; i< hh -1; i++) {
+          for (let j=1; j< hw -1; j++) {
+            let count=d[i-1][j-1]+d[i-1][j]+d[i-1][j+1]+d[i][j-1] + d[i][j+1]+d[i+1][j-1]+d[i+1][j]+d[i+1][j+1];
+            c[i][j]=d[i][j];
+            if (0== d[i][j]) { //dead   
+              if (3==count    )  
+                c[i][j]=1;  // revive
+            } else {  //live
+              if (1==count || 3<count )  
+                c[i][j]=0;  // die
+              rect(2*j, 2*i, 2,2);
+            }
+          }
+        }
+        d=c;
+      }
+    </script>
+  </body>
+</html>

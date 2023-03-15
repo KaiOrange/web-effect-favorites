@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4"
+    />
+    <title>迭代分型</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"
+      integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="text/javascript">
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      let a=0.5;
+      let b=0.3;
+      function setup() {
+        createCanvas(w, h); 
+      }
+      function draw() {
+        background(255); 
+        branch(new p5.Vector(w/2, h/2), 160, 0, 9);
+      }
+      function branch(p, r, theta, age) {
+        if (0>age)
+          return;
+        let v= new p5.Vector(r*cos(theta), r*sin(theta));   
+        v.add(p);
+        line(p.x, p.y, v.x, v.y);
+        line(w-p.x, p.y, w-v.x, v.y);
+        branch(v, a*r, theta + b*PI, age-1 );
+        branch(v, a*r, theta - b*PI, age-1);
+      }
+      function mouseMoved() {
+        a = map(mouseX, 0, w, 0.4, 0.8);
+        b = map(mouseY, 0, h, 0, 1);
+      }
+    </script>
+  </body>
+</html>

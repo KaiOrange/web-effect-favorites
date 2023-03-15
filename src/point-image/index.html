@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4"
+    />
+    <title>点彩图片</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"
+      integrity="sha512-3RlxD1bW34eFKPwj9gUXEWtdSMC59QqIqHnD8O/NoTwSJhgxRizdcFVQhUMFyTp5RwLTDL0Lbcqtl8b7bFAzog=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="text/javascript">
+      let img;
+      let w = 500;
+      let h = 313;
+      let pw = 6; // 点的最大宽度
+      function preload() {
+        // 加载图像
+        img = loadImage('./images/1.jpg');
+      }
+      function setup() {
+        createCanvas(w, h);
+        img.filter(BLUR, 2);
+      }
+      function draw() {
+        background(255);
+        fill(0);
+        noStroke();
+        let s = map(mouseX, 0, w, 0.8, 2.5);
+        for (let i = 0; i < h; i += pw) {
+          for (let j = 0; j < w; j += pw) {
+            let col = img.get(j, i);
+            let r = pw * sin((s * PI * brightness(col)) / 255);
+            fill(0, 255 - red(col));
+            ellipse(j, i, r, r);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
