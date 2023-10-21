@@ -234,6 +234,11 @@
       "title": "丝带",
       "img": "https://wef.kai666666.com/assets/images/silk-ribbon.png",
       "link": "https://wef.kai666666.com/silk-ribbon/"
+    },
+    {
+      "title": "WebGL 幽灵",
+      "img": "https://wef.kai666666.com/assets/images/ghost-cursor.png",
+      "link": "https://wef.kai666666.com/ghost-cursor/"
     }
   ] 
 }
