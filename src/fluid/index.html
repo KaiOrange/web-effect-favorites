@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4">
+  <title>Fluid</title>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+      overflow: hidden
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
+  <script type="text/javascript">
+
+    /*
+    * 作者信息：Fluid - @kynd
+    * 教程：https://kyndinfo.notion.site/Fluid-Simulation-f0516d9d12e245a08ae5c7545ac822dd
+    */
+    let fluid, paint, count = 0, canvas;
+    function init () {
+      const renderer = new
+        THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      canvas = renderer.domElement;
+      document.body.appendChild(canvas);
+
+      // Calculate half fov radians for camera setup
+      const fov = 65;
+      const hFovRadian = fov / 2 / 180 * Math.PI;
+      const cz = window.innerHeight / 2 / Math.tan(hFovRadian);
+
+      // Setup camera
+      const camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, cz * 4);
+      camera.position.z = cz;
+
+      // Create context object to hold renderer, camera and dimensions
+      const context = { renderer, camera, width: window.innerWidth, height: window.innerHeight };
+
+      // Initialize fluid and paint simulations
+      fluid = new Fluid(context);
+      paint = new Paint(context);
+    }
+
+    async function animate () {
+      if (count % 640 == 0) {
+        fluid.init();
+        paint.init();
+      }
+      count++;
+
+      fluid.update();
+      fluid.draw();
+      paint.update(fluid.getVelocity());
+      paint.draw();
+      requestAnimationFrame(animate);
+    }
+
+
+    //----------------------------------------
+
+    class Fluid {
+      constructor(context) {
+        this.context = context;
+        this.speed = 4;
+        this.forceInitMaterial = this.createShaderMaterial(forceInitFrag);
+        this.divergenceMaterial = this.createShaderMaterial(divergenceFrag);
+        this.advectionMaterial = this.createShaderMaterial(advectionFrag);
+        this.pressureMaterial = this.createShaderMaterial(pressureFrag);
+        this.updateMaterial = this.createShaderMaterial(forceUpdateFrag);
+        this.renderMaterial = this.createShaderMaterial(forceRenderFrag);
+        this.velocity = [this.createRenderTarget(), this.createRenderTarget()];
+        this.pressure = [this.createRenderTarget(), this.createRenderTarget()];
+        this.divergence = this.createRenderTarget();
+        this.advection = this.createRenderTarget();
+        this.blank = this.createRenderTarget();
+
+        // Main Scene
+        this.mainScene = new THREE.Scene();
+        this.mainMesh = this.createMesh(0, 0, this.context.width, this.context.height);
+        this.mainScene.add(this.mainMesh);
+
+        this.init();
+      }
+
+      init () {
+        this.velocityIndex = 0;
+        this.context.renderer.setRenderTarget(this.velocity[0]);
+        this.mainMesh.material = this.forceInitMaterial;
+        this.forceInitMaterial.uniforms.seed = { value: Math.random() * 100.0 }
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      createShaderMaterial (frag) {
+        return new THREE.ShaderMaterial({
+          vertexShader: vert,
+          fragmentShader: frag,
+          uniforms: { tex: { value: null }, res: { value: [this.context.width, this.context.height] }, speed: { value: this.speed } }
+        });
+      }
+
+      createRenderTarget () {
+        return new THREE.WebGLRenderTarget(this.context.width, this.context.height, {
+          format: THREE.RGBAFormat,
+          type: THREE.FloatType
+        })
+      }
+
+      createMesh (cx, cy, w, h) {
+        const geometry = new THREE.PlaneGeometry(w, h);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = cx;
+        mesh.position.y = cy;
+        return mesh;
+      }
+
+      update () {
+        this.updateAdvection();
+        this.updateDivergence();
+        this.updatepPressure();
+        this.updateVelocity();
+      }
+
+      updateAdvection () {
+        this.context.renderer.setRenderTarget(this.advection);
+        this.mainMesh.material = this.advectionMaterial;
+        this.advectionMaterial.uniforms.tex = { value: this.velocity[this.velocityIndex].texture };
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      updateDivergence () {
+        this.context.renderer.setRenderTarget(this.divergence);
+        this.mainMesh.material = this.divergenceMaterial;
+        this.divergenceMaterial.uniforms.tex = { value: this.advection.texture };
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      updatepPressure () {
+        this.context.renderer.setRenderTarget(this.pressure[0]);
+        this.context.renderer.clear();
+        this.context.renderer.setRenderTarget(null);
+
+        for (let i = 0; i < 4; i++) {
+          let i0 = i % 2;
+          let i1 = (i + 1) % 2;
+          const prevPressure = this.pressure[i0];
+          const nextPressure = this.pressure[i1];
+
+          this.context.renderer.setRenderTarget(nextPressure);
+          this.mainMesh.material = this.pressureMaterial;
+          this.pressureMaterial.uniforms.tex = { value: prevPressure.texture };
+          this.pressureMaterial.uniforms.divergence = { value: this.divergence.texture };
+          this.context.renderer.render(this.mainScene, this.context.camera);
+          this.context.renderer.setRenderTarget(null);
+        }
+      }
+
+      updateVelocity () {
+        const i1 = (this.velocityIndex + 1) % 2;
+        const nextVelocity = this.velocity[i1];
+        this.velocityIndex = i1;
+
+        this.context.renderer.setRenderTarget(nextVelocity);
+        this.mainMesh.material = this.updateMaterial;
+        this.updateMaterial.uniforms.pressure = { value: this.pressure[1].texture };
+        this.updateMaterial.uniforms.advection = { value: this.advection.texture };
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      draw () {
+        this.mainMesh.material = this.renderMaterial;
+        this.renderMaterial.uniforms.tex = { value: this.getVelocity().texture }
+        this.context.renderer.render(this.mainScene, this.context.camera);
+      }
+
+      getVelocity () {
+        return this.velocity[this.velocityIndex];
+      }
+    }
+
+    class Paint {
+      constructor(context) {
+        this.context = context;
+        this.speed = 4;
+        this.initMaterial = this.createShaderMaterial(paintInitFrag);
+        this.updateMaterial = this.createShaderMaterial(paintUpdateFrag);
+        this.renderMaterial = this.createShaderMaterial(paintRenderFrag);
+        this.paint = [this.createRenderTarget(), this.createRenderTarget()];
+
+        // Main Scene
+        this.mainScene = new THREE.Scene();
+        this.mainMesh = this.createMesh(0, 0, this.context.width, this.context.height);
+        this.mainScene.add(this.mainMesh);
+
+        this.init();
+      }
+
+      init () {
+        this.paintIndex = 0;
+        this.context.renderer.setRenderTarget(this.paint[0]);
+        this.mainMesh.material = this.initMaterial;
+        this.initMaterial.uniforms.seed = { value: Math.random() * 100.0 }
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      createShaderMaterial (frag) {
+        return new THREE.ShaderMaterial({
+          vertexShader: vert,
+          fragmentShader: frag,
+          uniforms: { tex: { value: null }, res: { value: [this.context.width, this.context.height] }, speed: { value: this.speed } }
+        });
+      }
+
+      createRenderTarget () {
+        return new THREE.WebGLRenderTarget(this.context.width, this.context.height, {
+          format: THREE.RGBAFormat,
+          type: THREE.FloatType
+        })
+      }
+
+      createMesh (cx, cy, w, h) {
+        const geometry = new THREE.PlaneGeometry(w, h);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = cx;
+        mesh.position.y = cy;
+        return mesh;
+      }
+
+      update (velocity) {
+        const i0 = this.paintIndex % 2;
+        const i1 = (this.paintIndex + 1) % 2;
+        const prevPaint = this.paint[i0];
+        const nextPaint = this.paint[i1];
+        this.paintIndex = i1;
+
+        this.context.renderer.setRenderTarget(nextPaint);
+        this.mainMesh.material = this.updateMaterial;
+        this.updateMaterial.uniforms.tex = { value: prevPaint.texture };
+        this.updateMaterial.uniforms.velocity = { value: velocity.texture };
+        this.context.renderer.render(this.mainScene, this.context.camera);
+        this.context.renderer.setRenderTarget(null);
+      }
+
+      draw () {
+        this.mainMesh.material = this.renderMaterial;
+        this.renderMaterial.uniforms.tex = { value: this.getPaint().texture }
+        this.context.renderer.render(this.mainScene, this.context.camera);
+      }
+
+      getPaint () {
+        return this.paint[this.paintIndex];
+      }
+    }
+
+    // SHADERS
+
+    const noise = `
+      /*
+      Simplex Noise code is from:
+      (Shader Library) Simplex Noise in GLSL
+      http://www.geeks3d.com/20110317/shader-library-simplex-noise-glsl-opengl/
+      */
+
+      #define  NORMALIZE_GRADIENTS
+      #undef  USE_CIRCLE
+      #define COLLAPSE_SORTNET
+
+          float permute(float x0,vec3 p) {
+              float x1 = mod(x0 * p.y, p.x);
+              return floor(  mod( (x1 + p.z) *x0, p.x ));
+          }
+          vec2 permute(vec2 x0,vec3 p) {
+              vec2 x1 = mod(x0 * p.y, p.x);
+              return floor(  mod( (x1 + p.z) *x0, p.x ));
+          }
+          vec3 permute(vec3 x0,vec3 p) {
+              vec3 x1 = mod(x0 * p.y, p.x);
+              return floor(  mod( (x1 + p.z) *x0, p.x ));
+          }
+          vec4 permute(vec4 x0,vec3 p) {
+              vec4 x1 = mod(x0 * p.y, p.x);
+              return floor(  mod( (x1 + p.z) *x0, p.x ));
+          }
+
+          //uniform vec4 pParam;
+          // Example constant with a 289 element permutation
+          const vec4 pParam = vec4( 17.0*17.0, 34.0, 1.0, 7.0);
+
+          float taylorInvSqrt(float r)
+          {
+              return ( 0.83666002653408 + 0.7*0.85373472095314 - 0.85373472095314 * r );
+          }
+
+          float simplexNoise2(vec2 v)
+          {
+              const vec2 C = vec2(0.211324865405187134, // (3.0-sqrt(3.0))/6.;
+                                  0.366025403784438597); // 0.5*(sqrt(3.0)-1.);
+              const vec3 D = vec3( 0., 0.5, 2.0) * 3.14159265358979312;
+              // First corner
+              vec2 i  = floor(v + dot(v, C.yy) );
+              vec2 x0 = v -   i + dot(i, C.xx);
+
+              // Other corners
+              vec2 i1  =  (x0.x > x0.y) ? vec2(1.,0.) : vec2(0.,1.) ;
+
+              //  x0 = x0 - 0. + 0. * C
+              vec2 x1 = x0 - i1 + 1. * C.xx ;
+              vec2 x2 = x0 - 1. + 2. * C.xx ;
+
+              // Permutations
+              i = mod(i, pParam.x);
+              vec3 p = permute( permute(
+                                        i.y + vec3(0., i1.y, 1. ), pParam.xyz)
+                              + i.x + vec3(0., i1.x, 1. ), pParam.xyz);
+
+      #ifndef USE_CIRCLE
+              // ( N points uniformly over a line, mapped onto a diamond.)
+              vec3 x = fract(p / pParam.w) ;
+              vec3 h = 0.5 - abs(x) ;
+
+              vec3 sx = vec3(lessThan(x,D.xxx)) *2. -1.;
+              vec3 sh = vec3(lessThan(h,D.xxx));
+
+              vec3 a0 = x + sx*sh;
+              vec2 p0 = vec2(a0.x,h.x);
+              vec2 p1 = vec2(a0.y,h.y);
+              vec2 p2 = vec2(a0.z,h.z);
+
+      #ifdef NORMALISE_GRADIENTS
+              p0 *= taylorInvSqrt(dot(p0,p0));
+              p1 *= taylorInvSqrt(dot(p1,p1));
+              p2 *= taylorInvSqrt(dot(p2,p2));
+      #endif
+
+              vec3 g = 2.0 * vec3( dot(p0, x0), dot(p1, x1), dot(p2, x2) );
+      #else
+              // N points around a unit circle.
+              vec3 phi = D.z * mod(p,pParam.w) /pParam.w ;
+              vec4 a0 = sin(phi.xxyy+D.xyxy);
+              vec2 a1 = sin(phi.zz  +D.xy);
+              vec3 g = vec3( dot(a0.xy, x0), dot(a0.zw, x1), dot(a1.xy, x2) );
+      #endif
+              // mix
+              vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.);
+              m = m*m ;
+              return 1.66666* 70.*dot(m*m, g);
+          }
+
+          float simplexNoise3(vec3 v)
+          {
+              const vec2  C = vec2(1./6. , 1./3. ) ;
+              const vec4  D = vec4(0., 0.5, 1.0, 2.0);
+
+              // First corner
+              vec3 i  = floor(v + dot(v, C.yyy) );
+              vec3 x0 =   v - i + dot(i, C.xxx) ;
+
+              // Other corners
+      #ifdef COLLAPSE_SORTNET
+              vec3 g = vec3( greaterThan(   x0.xyz, x0.yzx) );
+              vec3 l = vec3( lessThanEqual( x0.xyz, x0.yzx) );
+
+              vec3 i1 = g.xyz  * l.zxy;
+              vec3 i2 = max( g.xyz, l.zxy);
+      #else
+              // Keeping this clean - let the compiler optimize.
+              vec3 q1;
+              q1.x = max(x0.x, x0.y);
+              q1.y = min(x0.x, x0.y);
+              q1.z = x0.z;
+
+              vec3 q2;
+              q2.x = max(q1.x,q1.z);
+              q2.z = min(q1.x,q1.z);
+              q2.y = q1.y;
+
+              vec3 q3;
+              q3.y = max(q2.y, q2.z);
+              q3.z = min(q2.y, q2.z);
+              q3.x = q2.x;
+
+              vec3 i1 = vec3(equal(q3.xxx, x0));
+              vec3 i2 = i1 + vec3(equal(q3.yyy, x0));
+      #endif
+
+              //  x0 = x0 - 0. + 0. * C
+              vec3 x1 = x0 - i1 + 1. * C.xxx;
+              vec3 x2 = x0 - i2 + 2. * C.xxx;
+              vec3 x3 = x0 - 1. + 3. * C.xxx;
+
+              // Permutations
+              i = mod(i, pParam.x );
+              vec4 p = permute( permute( permute(
+                                                i.z + vec4(0., i1.z, i2.z, 1. ), pParam.xyz)
+                                        + i.y + vec4(0., i1.y, i2.y, 1. ), pParam.xyz)
+                              + i.x + vec4(0., i1.x, i2.x, 1. ), pParam.xyz);
+
+              // Gradients
+              // ( N*N points uniformly over a square, mapped onto a octohedron.)
+              float n_ = 1.0/pParam.w ;
+              vec3  ns = n_ * D.wyz - D.xzx ;
+
+              vec4 j = p - pParam.w*pParam.w*floor(p * ns.z *ns.z);  //  mod(p,N*N)
+
+              vec4 x_ = floor(j * ns.z)  ;
+              vec4 y_ = floor(j - pParam.w * x_ ) ;    // mod(j,N)
+
+              vec4 x = x_ *ns.x + ns.yyyy;
+              vec4 y = y_ *ns.x + ns.yyyy;
+              vec4 h = 1. - abs(x) - abs(y);
+
+              vec4 b0 = vec4( x.xy, y.xy );
+              vec4 b1 = vec4( x.zw, y.zw );
+
+              vec4 s0 = vec4(lessThan(b0,D.xxxx)) *2. -1.;
+              vec4 s1 = vec4(lessThan(b1,D.xxxx)) *2. -1.;
+              vec4 sh = vec4(lessThan(h, D.xxxx));
+
+              vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+              vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+
+              vec3 p0 = vec3(a0.xy,h.x);
+              vec3 p1 = vec3(a0.zw,h.y);
+              vec3 p2 = vec3(a1.xy,h.z);
+              vec3 p3 = vec3(a1.zw,h.w);
+
+      #ifdef NORMALISE_GRADIENTS
+              p0 *= taylorInvSqrt(dot(p0,p0));
+              p1 *= taylorInvSqrt(dot(p1,p1));
+              p2 *= taylorInvSqrt(dot(p2,p2));
+              p3 *= taylorInvSqrt(dot(p3,p3));
+      #endif
+
+              // Mix
+              vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.);
+              m = m * m;
+              //used to be 64.
+              return 48.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
+                                          dot(p2,x2), dot(p3,x3) ) );
+          }
+
+          vec4 grad4(float j, vec4 ip)
+          {
+              const vec4 ones = vec4(1.,1.,1.,-1.);
+              vec4 p,s;
+
+              p.xyz = floor( fract (vec3(j) * ip.xyz) *pParam.w) * ip.z -1.0;
+              p.w = 1.5 - dot(abs(p.xyz), ones.xyz);
+              s = vec4(lessThan(p,vec4(0.)));
+              p.xyz = p.xyz + (s.xyz*2.-1.) * s.www;
+
+              return p;
+          }
+
+          float simplexNoise4(vec4 v)
+          {
+              const vec2  C = vec2( 0.138196601125010504,
+                                  0.309016994374947451);
+              // First corner
+              vec4 i  = floor(v + dot(v, C.yyyy) );
+              vec4 x0 = v -   i + dot(i, C.xxxx);
+
+              // Other corners
+
+              // Force existance of strict total ordering in sort.
+              vec4 q0 = floor(x0 * 1024.0) + vec4( 0., 1./4., 2./4. , 3./4.);
+              vec4 q1;
+              q1.xy = max(q0.xy,q0.zw);   //  x:z  y:w
+              q1.zw = min(q0.xy,q0.zw);
+
+              vec4 q2;
+              q2.xz = max(q1.xz,q1.yw);   //  x:y  z:w
+              q2.yw = min(q1.xz,q1.yw);
+
+              vec4 q3;
+              q3.y = max(q2.y,q2.z);      //  y:z
+              q3.z = min(q2.y,q2.z);
+              q3.xw = q2.xw;
+
+              vec4 i1 = vec4(lessThanEqual(q3.xxxx, q0));
+              vec4 i2 = vec4(lessThanEqual(q3.yyyy, q0));
+              vec4 i3 = vec4(lessThanEqual(q3.zzzz, q0));
+
+              //  x0 = x0 - 0. + 0. * C
+              vec4 x1 = x0 - i1 + 1. * C.xxxx;
+              vec4 x2 = x0 - i2 + 2. * C.xxxx;
+              vec4 x3 = x0 - i3 + 3. * C.xxxx;
+              vec4 x4 = x0 - 1. + 4. * C.xxxx;
+
+              // Permutations
+              i = mod(i, pParam.x );
+              float j0 = permute( permute( permute( permute (
+                                                            i.w, pParam.xyz) + i.z, pParam.xyz)
+                                          + i.y, pParam.xyz) + i.x, pParam.xyz);
+              vec4 j1 = permute( permute( permute( permute (
+                                                            i.w + vec4(i1.w, i2.w, i3.w, 1. ), pParam.xyz)
+                                                  + i.z + vec4(i1.z, i2.z, i3.z, 1. ), pParam.xyz)
+                                        + i.y + vec4(i1.y, i2.y, i3.y, 1. ), pParam.xyz)
+                                + i.x + vec4(i1.x, i2.x, i3.x, 1. ), pParam.xyz);
+              // Gradients
+              // ( N*N*N points uniformly over a cube,
+              // mapped onto a 4-octohedron.)
+              vec4 ip = pParam ;
+              ip.xy *= pParam.w ;
+              ip.x  *= pParam.w ;
+              ip = vec4(1.,1.,1.,2.) / ip ;
+
+              vec4 p0 = grad4(j0,   ip);
+              vec4 p1 = grad4(j1.x, ip);
+              vec4 p2 = grad4(j1.y, ip);
+              vec4 p3 = grad4(j1.z, ip);
+              vec4 p4 = grad4(j1.w, ip);
+
+      #ifdef NORMALISE_GRADIENTS
+              p0 *= taylorInvSqrt(dot(p0,p0));
+              p1 *= taylorInvSqrt(dot(p1,p1));
+              p2 *= taylorInvSqrt(dot(p2,p2));
+              p3 *= taylorInvSqrt(dot(p3,p3));
+              p4 *= taylorInvSqrt(dot(p4,p4));
+      #endif
+
+              // Mix
+              vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.);
+              vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.);
+              m0 = m0 * m0;
+              m1 = m1 * m1;
+              return 32. * (dot(m0*m0, vec3(dot(p0, x0), dot(p1, x1), dot(p2, x2)))
+                            + dot(m1*m1, vec2(dot(p3, x3), dot(p4, x4)))) ;
+
+          }
+
+      float v3n1(vec3 v) {
+        return simplexNoise3(v);
+      }
+
+      vec3 v3n3(vec3 v) {
+          float n0 = simplexNoise3(v * 0.01);
+          float n1 = simplexNoise3(v * 0.0123 + vec3(100.0));
+          float n2 = simplexNoise3(v * 0.0134 + vec3(200.0));
+          return vec3(n0, n1, n2);
+      }
+
+      vec2 v2n2(vec2 v) {
+          float n0 = simplexNoise2(v * 0.01);
+          float n1 = simplexNoise2(v * 0.0123 + vec2(100.0));
+          return vec2(n0, n1);
+      }
+      `
+
+    const vert = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main()
+      {
+          vNormal = normalize(normalMatrix * normal);
+          vUv = uv;
+          vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+          gl_Position = projectionMatrix * mvPosition;
+      }`;
+
+    const advectionFrag = `
+      uniform vec2 res;
+      uniform float speed;
+      uniform sampler2D tex;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      vec2 wrap(vec2 v) {
+          return vec2(fract(v.x), fract(v.y));
+      }
+
+      void main()
+      {
+          vec2 vel = texture(tex, wrap(vUv)).xy;
+          vec4 color = texture(tex, wrap(vUv + vel * speed / res));
+          gl_FragColor = color;
+      }`
+
+    const divergenceFrag = `
+      uniform vec2 res;
+      uniform float speed;
+      uniform sampler2D tex;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      vec2 wrap(vec2 v) {
+          return vec2(fract(v.x), fract(v.y));
+      }
+
+      vec2 u(vec2 coord) {
+          return texture(tex, wrap(coord)).xy;
+      }
+
+      void main()
+      {
+          float rho = 1.0;
+          float deltaT = 1.0 / 60.0;
+          vec3 px = vec3(1.0 / res.x, 1.0 / res.y, 0.0) * speed;
+
+          float divergence = 
+              (px.x * rho / deltaT) * 
+              (
+                  (u(vUv - px.xz).x -
+                  u(vUv + px.xz).x)
+                  +
+                  (u(vUv - px.zy).y -
+                  u(vUv + px.zy).y)
+              );
+
+          gl_FragColor = vec4(divergence , 0.0, 0.0, 1.0);
+      }`
+
+    const forceInitFrag = noise + `
+
+      uniform float seed;
+      uniform vec2 res;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main() {
+        float n0 = seed + 12.3;
+        float n1 = seed + 123.4;
+        float n2 = seed + 1234.5;
+
+        vec2 v0 = vUv * res / 1111.5;
+        vec2 v1 = vUv * res / 1124.0;
+        vec2 v2 = vUv * res / 1136.0;
+
+        float nr = (v3n1(vec3(v0, n0)) + v3n1(vec3(v1, n1)) + v3n1(vec3(v2, n2)));
+        float ng = (v3n1(vec3(v0, n1)) + v3n1(vec3(v1, n2)) + v3n1(vec3(v2, n0)));
+
+        gl_FragColor = vec4(nr, ng, 0.0, 1.0);
+      }
+      `
+
+    const forceRenderFrag = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      uniform sampler2D tex;
+
+      void main( void ) {
+        gl_FragColor = texture(tex, vUv);
+      }`;
+
+    const forceUpdateFrag = `
+      uniform vec2 res;
+      uniform float speed;
+      uniform sampler2D pressure;
+      uniform sampler2D advection;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      vec2 wrap(vec2 v) {
+        return vec2(fract(v.x), fract(v.y));
+      }
+
+      float p(vec2 coord) {
+        return texture(pressure, wrap(coord)).x;
+      }
+
+      void main() {
+        float deltaT = 1.0 / 60.0;
+        float rho = 0.999;
+        vec3 px = vec3(1.0 / res.x, 1.0 / res.y, 0.0) * speed;
+        vec4 u_a = texture(advection, vUv);
+        
+        float diff_p_x = (p(vUv + px.xz) - p(vUv - px.xz));
+        float u_x = u_a.x - deltaT / (2.0 * rho * px.x) * diff_p_x;
+        float diff_p_y = (p(vUv + px.zy) - p(vUv - px.zy));
+        float u_y = u_a.y - deltaT / (2.0 * rho * px.y) * diff_p_y;
+        u_a = vec4(vec2(u_x, u_y) * 1.0, 0.0, 1.0);
+
+        gl_FragColor = u_a;
+      }
+      `
+
+    const pressureFrag = noise + `
+      uniform vec2 res;
+      uniform float speed;
+      uniform sampler2D tex;
+      uniform sampler2D divergence;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      vec2 wrap(vec2 v) {
+        return vec2(fract(v.x), fract(v.y));
+      }
+
+      float d(vec2 coord) {
+        return texture(divergence, wrap(coord)).x;
+      }
+
+      float p(vec2 coord) {
+        return texture(tex, wrap(coord)).x;
+      }
+
+      void main() {
+        vec3 px = vec3(1.0 / res.x, 1.0 / res.y, 0.0) * speed;
+
+        float pressure = 0.25 * (d(vUv)
+        + p(vUv + px.xz)
+        + p(vUv - px.xz)
+        + p(vUv + px.zy)
+        + p(vUv - px.zy)
+        );
+
+        gl_FragColor = vec4(vec3(pressure), 1.0);
+      }
+      `
+
+    const paintInitFrag = noise + `
+      uniform float seed;
+      uniform vec2 res;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main() {
+
+        float n0 = seed + 12.3;
+        float n1 = seed + 123.4;
+        float n2 = seed + 1234.5;
+
+        vec2 v0 = vUv * res / 1234.5;
+        vec2 v1 = vUv * res / 2345.0;
+        vec2 v2 = vUv * res / 3456.0;
+
+        float nr = v3n1(vec3(v0, n0)) + v3n1(vec3(v1, n2)) + v3n1(vec3(v2, n1));
+        float ng = v3n1(vec3(v1, n1)) + v3n1(vec3(v2, n0)) + v3n1(vec3(v0, n2));
+        float nb = v3n1(vec3(v2, n2)) + v3n1(vec3(v0, n1)) + v3n1(vec3(v1, n0));
+        vec4 color = vUv.x < 0.5 ? vec4(1.0, 0.2, 0.0, 1.0) : vec4(0.0, 0.5, 1.0, 1.0);
+        color.rgb += vec3(nr, ng, nb);
+        gl_FragColor = color;
+      }
+      `
+
+    const paintRenderFrag = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      uniform vec2 res;
+      uniform sampler2D tex;
+
+      vec2 wrap(vec2 v) {
+        return vec2(fract(v.x), fract(v.y));
+      }
+
+      void main( void ) {
+        vec3 px = vec3(1.0 / res.x, 1.0 / res.y, 0.0);
+        vec4 pu = texture(tex, vUv);
+        vec4 p = texture(tex, wrap(vUv + px.yz));
+        //float d = (p.r + p.g + p.b) - (pu.r + pu.g + pu.b);
+
+        vec4 color = p;
+        color.r += p.r - pu.r;
+        color.g += p.g - pu.g;
+        color.b += p.b - pu.b;
+
+        gl_FragColor = color;
+      }`;
+
+    const paintUpdateFrag = `
+      uniform vec2 res;
+      uniform float speed;
+      uniform sampler2D tex;
+      uniform sampler2D velocity;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      vec2 wrap(vec2 v) {
+          return vec2(fract(v.x), fract(v.y));
+      }
+
+      void main()
+      {
+          vec3 px = vec3(1.0 / res.x, 1.0 / res.y, 0.0) * speed;
+          vec4 v = texture(velocity, vUv);
+          vec4 p = texture(tex, wrap(vUv + px.xy * v.xy));
+
+          gl_FragColor = p;
+      }
+      `
+
+    // START
+
+    init();
+    animate();
+
+  </script>
+</body>
+
+</html>

@@ -239,6 +239,11 @@
       "title": "WebGL 幽灵",
       "img": "https://wef.kai666666.com/assets/images/ghost-cursor.png",
       "link": "https://wef.kai666666.com/ghost-cursor/"
+    },
+    {
+      "title": "流体",
+      "img": "https://wef.kai666666.com/assets/images/fluid.png",
+      "link": "https://wef.kai666666.com/fluid/"
     }
   ] 
 }
