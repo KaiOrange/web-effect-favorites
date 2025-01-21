@@ -244,6 +244,36 @@
       "title": "流体",
       "img": "https://wef.kai666666.com/assets/images/fluid.png",
       "link": "https://wef.kai666666.com/fluid/"
+    },
+    {
+      "title": "太空地球仪",
+      "img": "https://wef.kai666666.com/assets/images/space-globe.png",
+      "link": "https://wef.kai666666.com/space-globe/"
+    },
+    {
+      "title": "彩色凯瑟琳之轮",
+      "img": "https://wef.kai666666.com/assets/images/colour-catherine-wheel.png",
+      "link": "https://wef.kai666666.com/colour-catherine-wheel/"
+    },
+    {
+      "title": "爬行的蜘蛛",
+      "img": "https://wef.kai666666.com/assets/images/thing.png",
+      "link": "https://wef.kai666666.com/thing/"
+    },
+    {
+      "title": "快速点画变形",
+      "img": "https://wef.kai666666.com/assets/images/fast-stippling-morphing.png",
+      "link": "https://wef.kai666666.com/fast-stippling-morphing/"
+    },
+    {
+      "title": "光之盒",
+      "img": "https://wef.kai666666.com/assets/images/box-of-light.png",
+      "link": "https://wef.kai666666.com/box-of-light/"
+    },
+    {
+      "title": "流体文字",
+      "img": "https://wef.kai666666.com/assets/images/fluid-simulation-text.png",
+      "link": "https://wef.kai666666.com/fluid-simulation-text/"
     }
   ] 
 }

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4">
+  <title>爬行的蜘蛛</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>  
+</head>
+<body>
+  
+  <script type="module">
+
+    /*
+      * 作品信息：
+      * thing - @Stranger in the Q
+      */
+
+    import {SimplexNoise} from "https://cdn.jsdelivr.net/npm/simplex-noise-esm@2.5.0-esm.0/dist-esm/simplex-noise.js"
+    import {
+        Scene, WebGLRenderer, PerspectiveCamera, GridHelper, Vector2, InstancedMesh,
+        Mesh, MeshNormalMaterial, SphereGeometry, PlaneGeometry, DirectionalLight, CameraHelper,
+        Vector3, Raycaster, Object3D, DynamicDrawUsage, MeshStandardMaterial, PCFSoftShadowMap
+    } from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.168.0/three.module.js";
+
+    import {OrbitControls} from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js'
+
+    let noise = new SimplexNoise()
+
+    const sphereGeometry = new SphereGeometry(1, 16, 16)
+
+
+    const scene = new Scene();
+    const light = new DirectionalLight();
+    light.position.set(1, 10, 10);
+    light.castShadow = true;
+    light.shadow.mapSize.width = 2048; // default
+    light.shadow.mapSize.height = 2048; // default
+    light.shadow.camera.near = 0.5; // default
+    light.shadow.camera.far = 500; // default
+    scene.add(light)
+    // scene.add(new CameraHelper(light.shadow.camera));
+
+    // scene.add(new GridHelper())
+
+    let sz = 55;
+    const planeGeometry = new PlaneGeometry(sz, sz, 333, 333)
+    for (let i = 0; i < planeGeometry.attributes.position.array.length; i+=3) {
+        let x = planeGeometry.attributes.position.array[i+0]
+        let z = planeGeometry.attributes.position.array[i+1]
+        planeGeometry.attributes.position.array[i+2] -= noise.noise2D(x,z)/10
+        // debugger
+    }
+
+    for (let i = 0; i < planeGeometry.attributes.normal.array.length; i++)
+        planeGeometry.attributes.normal.array[i] += Math.random()*0.4
+    planeGeometry.verticesNeedUpdate = true;
+
+    const planeMaterial = new MeshStandardMaterial({color: 0xf0f0f0});
+    const plane = new Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true
+    plane.rotation.x = -Math.PI / 2;
+    scene.add(plane)
+
+    const agentMaterial = new MeshStandardMaterial({color: 0xf0f0e0});
+    const agent = new Mesh(sphereGeometry, agentMaterial);
+    agent.scale.multiplyScalar(0.1);
+    agent.position.set(0, 1, 0)
+    scene.add(agent)
+
+    const o = new Object3D();
+
+    for (let i = 0; i < 100; i++) {
+        const mesh = new Mesh(sphereGeometry, agentMaterial);
+        const gap = 0.2;
+        const rnd = 1 - gap * 2;
+        mesh.scale.multiplyScalar(0.1);
+        let x = i % 10 - 5 + Math.random() * rnd + gap;
+        let z = Math.floor(i / 10) - 5 + Math.random() * rnd + gap;
+        mesh.position.set(
+            x,
+            -noise.noise2D(x,-z)/10,
+            z
+        );
+        o.add(mesh);
+    }
+    // scene.add(o)
+
+    const im = new InstancedMesh(sphereGeometry, agentMaterial, 20000)
+    im.castShadow = true
+    im.receiveShadow = true
+    im.instanceMatrix.setUsage(DynamicDrawUsage);
+    scene.add(im);
+
+    const camera = new PerspectiveCamera();
+    camera.position.set(5, 5, 5);
+    camera.lookAt(new Vector3(1, 0, 1));
+
+    const renderer = new WebGLRenderer({antialias: true});
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const rc = new Raycaster();
+    const pt = new Vector2();
+    const c = renderer.domElement;
+    const tmp = new Object3D();
+
+    requestAnimationFrame(function render(t) {
+        if (renderer.width !== innerWidth || renderer.height !== innerHeight) {
+            renderer.setSize(innerWidth, innerHeight);
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+        }
+
+        rc.setFromCamera(pt, camera);
+
+        const intersects = rc.intersectObjects([plane]);
+
+        for (let i = 0; i < intersects.length; i++) {
+
+            let x = intersects[0].uv.x * sz - sz / 2
+            let z = sz / 2 - intersects[0].uv.y * sz
+
+            x = Math.max(-4, Math.min(4, x))
+            z = Math.max(-4, Math.min(4, z))
+
+            let dx = x - agent.position.x
+            let dz = z - agent.position.z
+
+            let speed = 0.1
+
+            agent.position.x += dx * speed
+            agent.position.z += dz * speed
+            agent.position.y = 1 - clamp(Math.abs(dx))*0.5
+
+            let index = 0
+
+            const r = 1.5
+
+            const {x: ax, y: ay, z: az} = agent.position;
+            o.children.forEach(child => {
+
+                const {x: cx, y: cy, z: cz} = child.position;
+                const d = Math.hypot(cx - ax, cz - az)
+
+                if (!child.active && d < r) {
+                    child.active = true;
+                    child.timestamp = Date.now();
+                }
+
+                if (child.active && d > r) {
+                    child.active = false;
+                    child.timestamp = Date.now();
+                }
+
+                if (child.timestamp) {
+                    const dt = (Date.now() - child.timestamp) / 100;
+                    let tt;
+                    if (child.active) {
+                        tt = Math.min(1, Math.max(0, dt));
+                    } else {
+                       tt = 1-Math.min(1, Math.max(0, dt));
+                        if (dt > 1) {
+                            child.timestamp = null
+                        }
+                    }
+
+                    let px = lerp(ax, cx, tt);
+                    let py = lerp(ay-0.1, cy, tt);
+                    let pz = lerp(az, cz, tt);
+
+                    for (let i = 0; i < 1000; i++) {
+                        let t = i / 999
+                        let x = lerp(px, ax, t);
+                        let y = lerp(py, ay, smoothstep(0,0.9,smoothstep(0,1,t))**.7);
+                        let z = lerp(pz, az, t);
+                        tmp.position.set(x, y, z);
+                        let k = t*t*t*0.1 + smoothstep(0.,0.01, t)*0.1
+                        let s = (1 - Math.sin(t * 3.14)**.2) * k + 0.01
+                        tmp.scale.set(s, s, s);
+                        tmp.updateMatrix();
+                        im.setMatrixAt(index, tmp.matrix);
+                        index++;
+                    }
+                }
+
+                // let s = 0.1 - Math.min(2, Math.max(0, d)) * 0.05;
+                // child.scale.set(s, s, s);
+                // if (r < 2) {
+                //     let dd = Math.min(r, d);
+                //     let px = lerp(agent.position.x, cx, dd);
+                //     let py = lerp(agent.position.y, 0, dd);
+                //     let pz = lerp(child.position.z, child.position.z, dd);
+                //     for (let i = 0; i < 1000; i++) {
+                //         let t = i / 999
+                //         let x = lerp(px, agent.position.x, t);
+                //         let y = lerp(py, agent.position.y, t);
+                //         let z = lerp(pz, agent.position.z, t);
+                //         tmp.position.set(x, y, z);
+                //         let s = (1 - Math.sin(t * 3.14)) * 0.1 + 0.01
+                //         tmp.scale.set(s, s, s);
+                //         tmp.updateMatrix();
+                //         im.setMatrixAt(index, tmp.matrix);
+                //         index++;
+                //     }
+                // }
+            });
+            im.count = index;
+            im.instanceMatrix.needsUpdate = true;
+            // im.needsUpdate = true;
+        }
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    });
+
+
+    c.addEventListener("mousemove", e => {
+        pt.x = e.offsetX / c.width * 2 - 1;
+        pt.y = 1 - e.offsetY / c.height * 2;
+    });
+
+
+    // new OrbitControls(camera, renderer.domElement);
+
+    function lerp(a, b, t) {
+        return a + (b - a) * t;
+    }
+
+    function smoothstep(edge0,edge1,x) {
+        x = clamp((x - edge0) / (edge1 - edge0));
+        return 3*x**2 - 2*x**3
+    }
+
+    function clamp(x) {
+        return Math.max(Math.min(1,x),0)
+    }
+
+</script>
+</body>
+</html>

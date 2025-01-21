@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://kai666666.com/images/apple-touch-icon-next.png?v=5.1.4" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://kai666666.com/images/favicon-32x32-next.png?v=5.1.4" />
+  <link rel="icon" type="image/png" sizes="16x16" href="https://kai666666.com/images/favicon-16x16-next.png?v=5.1.4" />
+  <title>快速点画变形</title>
+  <style>
+    #startMorphBtn {
+      width: 150px;
+      height: 30px;
+      background-color: #93c6d6;
+      text-align: center;
+      padding-top: 10px;
+      border: 2px solid rgb(92, 158, 193);
+      cursor: pointer;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="startMorphBtn" width="150" height="150">MORPH (click me)</div>
+
+  <script type="text/javascript">
+
+    /*
+      * 作品信息：
+      * Fast stippling morphing - @Moussa Dembélé
+      */
+
+    var Poisson = function (exports) {
+      var width, height, grid;
+      var imageData;
+
+      function distribute (count, radius, w, h, imgData) {
+        width = w;
+        height = h;
+        imageData = imgData;
+
+        var cellSize = exports.cellSize = radius / Math.sqrt(2);
+        exports.grid = grid = buildGrid(Math.ceil(w / cellSize), Math.ceil(h / cellSize));
+        count = Math.min(count, Math.floor(w / cellSize) * Math.floor(h / cellSize))
+
+        var processList = [];
+        var firstPoint = new Point(w * .5, h * .5);
+        processList.push(firstPoint);
+
+        setGridPoint(imageToGrid(firstPoint, cellSize), firstPoint);
+
+        var result = [];
+
+        var total = count;
+        while (result.length < count) {
+          var added = false;
+
+          var rid = ~~(Math.random() * processList.length);
+          var point = processList[rid];
+
+          for (var i = 0; i < 20; i++) {
+            var newPoint = generateRandomPointAround(point, radius);
+
+            //check that the point is in the image region
+            //and no points exists in the point's neighbourhood
+
+            var offset = ~~newPoint.x * 4 + ~~newPoint.y * 4 * width;
+            // skip white
+            if (imageData.data[offset] == 0xff && imageData.data[offset + 1] == 0xff && imageData.data[offset + 2] == 0xff) {
+            }
+            else
+              if (inRectangle(newPoint)
+                && !inNeighbourhood(grid, newPoint, radius, cellSize)) {
+                processList.push(newPoint);
+                newPoint.color = ((imageData.data[offset]) << 16) | ((imageData.data[offset + 1]) << 8) | (imageData.data[offset + 2]);
+                newPoint.red = imageData.data[offset];
+                newPoint.green = imageData.data[offset + 1];
+                newPoint.blue = imageData.data[offset + 2];
+
+                var red = imageData.data[offset];
+                var green = imageData.data[offset + 1];
+                var blue = imageData.data[offset + 2];
+                var mean = (red + green + blue) / 3;
+                var intensity = 1 - mean / 255;
+
+                newPoint.id = count - result.length;
+                newPoint.radius = ((newPoint.id * 2 / (count) + intensity) / 4) * radius * 1.2;
+                result.push(newPoint);
+                setGridPoint(imageToGrid(newPoint, cellSize), newPoint);
+                added = true;
+
+                maxRadius = Math.max(maxRadius, newPoint.radius);
+                minRadius = Math.min(minRadius, newPoint.radius);
+              }
+          }
+        }
+        return result;
+      }
+
+      function buildGrid (w, h) {
+        var g = [];
+        for (var i = 0; i < w; i++) {
+          var tmp = [];
+          for (var j = 0; j < h; j++) {
+            tmp.push(null);
+          }
+          g.push(tmp);
+        }
+        return g;
+      }
+
+      function setGridPoint (gridPoint, value) {
+
+        if (grid[gridPoint.x][gridPoint.y] != null) return;
+        grid[gridPoint.x][gridPoint.y] = value;
+      }
+
+      function inRectangle (point) {
+        return point.x > 0 && point.x < width && point.y > 0 && point.y < height;
+      }
+
+      function imageToGrid (point, cellSize) {
+        var gridX = ~~(point.x / cellSize);
+        var gridY = ~~(point.y / cellSize);
+        return new Point(gridX, gridY);
+      }
+
+      function generateRandomPointAround (point, mindist) {
+        var r1 = Math.random();
+        var r2 = Math.random();
+        var radius = mindist * (r1 + 1);
+        var angle = 2 * Math.PI * r2;
+        var newX = point.x + radius * Math.cos(angle);
+        var newY = point.y + radius * Math.sin(angle);
+        return new Point(newX, newY);
+      }
+
+      function inNeighbourhood (grid, point, mindist, cellSize) {
+        var gridPoint = imageToGrid(point, cellSize);
+
+        var cellsAroundPoint = squareAroundPoint(grid, gridPoint.x, gridPoint.y, 4);
+
+        var valid = false;
+        cellsAroundPoint.forEach(function (cell) {
+          if (cell == null) return;
+
+          var min_dist = mindist;
+
+          if (distance(cell, point) < min_dist) {
+
+            valid = true;
+          }
+        });
+        return valid;
+      }
+
+      function squareAroundPoint (grid, x, y, offset) {
+        var off = Math.round(offset / 2);
+        var minX = Math.max(0, Math.min(grid.length, x - off));
+        var maxX = Math.max(0, Math.min(grid.length, x + off));
+        var minY = Math.max(0, Math.min(grid[0].length, y - off));
+        var maxY = Math.max(0, Math.min(grid[0].length, y + off));
+        var tmp = [];
+        for (var i = minX; i < maxX; i++) {
+          for (var j = minY; j < maxY; j++) {
+            if (grid[i][j] != null) tmp.push(grid[i][j]);
+          }
+        }
+        return tmp;
+      }
+
+      exports.distribute = distribute;
+      return exports;
+    }({});
+
+
+    var Point = function () {
+      function Point (x, y, color, radius, id) {
+        this.x = x || 0;
+        this.y = y || 0;
+        this.color = color || 0;
+        this.red = color >> 16;
+        this.green = (color >> 8) & 0xff;
+        this.blue = color & 0xff;
+
+        this.radius = radius || 0;
+        this.id = id || 0;
+      }
+
+      var _p = Point.prototype;
+      _p.constructor = Point;
+
+      return Point;
+
+    }();
+    function distance (a, b) {
+      var dx = a.x - b.x;
+      var dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    //raf: https://github.com/cagosta/requestAnimationFrame/blob/master/app/requestAnimationFrame.js
+    (function (global) { (function () { if (global.requestAnimationFrame) { return; } if (global.webkitRequestAnimationFrame) { global.requestAnimationFrame = global['webkitRequestAnimationFrame']; global.cancelAnimationFrame = global['webkitCancelAnimationFrame'] || global['webkitCancelRequestAnimationFrame']; } var lastTime = 0; global.requestAnimationFrame = function (callback) { var currTime = new Date().getTime(); var timeToCall = Math.max(0, 16 - (currTime - lastTime)); var id = global.setTimeout(function () { callback(currTime + timeToCall); }, timeToCall); lastTime = currTime + timeToCall; return id; }; global.cancelAnimationFrame = function (id) { clearTimeout(id); }; })(); if (typeof define === 'function') { define(function () { return global.requestAnimationFrame; }); } })(window);
+
+
+
+    ///////////////////////////////////////////////////////////
+    function update () {
+      var date = new Date();
+      var before = date.getTime();
+      if (distribution == null) return;
+      var nbPointsToDraw = Math.min(from.length, to.length);
+      ratio = Math.max(1.5, ratio * 0.9);
+
+
+      var imageData = ctx.createImageData(imgWidth, imgHeight);
+      var pixelsData = imageData.data;
+      for (var i = 0; i < imgWidth * imgHeight * 4; i++) {
+        pixelsData[i] = 0xff;
+      }
+      var indexX;
+      var indexY;
+      var canvasCirclesWidth = 0 + canvasCircles.width;
+
+      ctx.strokeStyle = "#000000";
+      ctx.lineCap = "round";
+      ctx.lineWidth = pRadius;
+
+      for (var i = 0; i < nbPointsToDraw; i++) {
+
+        var pRed = from[i].red;
+        var pGreen = from[i].green;
+        var pBlue = from[i].blue;
+        var pToRed = to[i].red;
+        var pToGreen = to[i].green;
+        var pToBlue = to[i].blue;
+
+        var pX = from[i].x;
+        var pY = from[i].y;
+        var pToX = to[i].x;
+        var pToY = to[i].y;
+
+        var idx;
+        var idxCircle;
+
+        var pRadius = from[i].radius;
+        var pToRadius = to[i].radius;
+        var roundedRadius;
+
+        pRed += (pToRed - pRed) / ratio;
+        pGreen += (pToGreen - pGreen) / ratio;
+        pBlue += (pToBlue - pBlue) / ratio;
+
+        pX += (pToX - pX) / ratio;
+        pY += (pToY - pY) / ratio;
+
+        pRadius += (pToRadius - pRadius) / ratio;
+
+        // transition ended for this point, removing it from list
+        if ((pToX - pX) <= 0.005 && (pToY - pY) <= 0.005 && (pToRed - pRed) <= 0.005 && (pToGreen - pGreen) <= 0.005 && (pToBlue - pBlue) <= 0.005 && (pToRadius - pRadius) <= 0.005) {
+          processingPoints--;
+        }
+
+        var color = (pRed << 16) | (pGreen << 8) | pBlue;
+
+        var tRadius = 0;
+        while (tRadius < pRadius) {
+          tRadius += increment;
+        }
+
+        idx = (~~(pX - pRadius)) * 4 + (~~(pY - pRadius)) * 4 * imgWidth;
+
+        var offset = maxRadius * 2 * ((tRadius - increment) / increment);
+        offset = ~~(offset + 0.5);
+        roundedRadius = ~~(pRadius);
+        roundedRadius = Math.max(roundedRadius, 1);
+        idxCircle = offset * 4;
+
+
+        for (indexX = 0; indexX < roundedRadius * 8 + 4; indexX += 4) {
+          for (indexY = 0; indexY < roundedRadius * 8 + 4; indexY += 4) {
+            if (
+              circlesData[idxCircle + indexX + indexY * canvasCirclesWidth] < 64) {
+
+              pixelsData[idx + indexX + indexY * imgWidth] = ~~pRed;
+              pixelsData[idx + indexX + indexY * imgWidth + 1] = ~~pGreen;
+              pixelsData[idx + indexX + indexY * imgWidth + 2] = ~~pBlue;
+
+              pixelsData[idx + indexX + indexY * imgWidth + 3] = 255;
+            }
+            else if (circlesData[idxCircle + indexX + indexY * canvasCirclesWidth] <= 90) {
+              pixelsData[idx + indexX + indexY * imgWidth] = ~~((5 * pRed + pixelsData[idx + indexX + indexY * imgWidth]) / 6);
+              pixelsData[idx + indexX + indexY * imgWidth + 1] = ~~((5 * pGreen + pixelsData[idx + indexX + indexY * imgWidth + 1]) / 6);
+              pixelsData[idx + indexX + indexY * imgWidth + 2] = ~~((5 * pBlue + pixelsData[idx + indexX + indexY * imgWidth + 2]) / 6);
+
+              pixelsData[idx + indexX + indexY * imgWidth + 3] = 255;
+            }
+            else if (circlesData[idxCircle + indexX + indexY * canvasCirclesWidth] <= 128) {
+              pixelsData[idx + indexX + indexY * imgWidth] = ~~((3 * pRed + pixelsData[idx + indexX + indexY * imgWidth]) / 4);
+              pixelsData[idx + indexX + indexY * imgWidth + 1] = ~~((3 * pGreen + pixelsData[idx + indexX + indexY * imgWidth + 1]) / 4);
+              pixelsData[idx + indexX + indexY * imgWidth + 2] = ~~((3 * pBlue + pixelsData[idx + indexX + indexY * imgWidth + 2]) / 4);
+
+              pixelsData[idx + indexX + indexY * imgWidth + 3] = 255;
+            }
+            else if (circlesData[idxCircle + indexX + indexY * canvasCirclesWidth] <= 200) {
+              pixelsData[idx + indexX + indexY * imgWidth] = ~~((pRed + pixelsData[idx + indexX + indexY * imgWidth]) / 2);
+              pixelsData[idx + indexX + indexY * imgWidth + 1] = ~~((pGreen + pixelsData[idx + indexX + indexY * imgWidth + 1]) / 2);
+              pixelsData[idx + indexX + indexY * imgWidth + 2] = ~~((pBlue + pixelsData[idx + indexX + indexY * imgWidth + 2]) / 2);
+
+              pixelsData[idx + indexX + indexY * imgWidth + 3] = 255;
+            }
+            else if (circlesData[idxCircle + indexX + indexY * canvasCirclesWidth] <= 240) {
+              pixelsData[idx + indexX + indexY * imgWidth] = ~~((pRed + 3 * pixelsData[idx + indexX + indexY * imgWidth]) / 4);
+              pixelsData[idx + indexX + indexY * imgWidth + 1] = ~~((pGreen + 3 * pixelsData[idx + indexX + indexY * imgWidth + 1]) / 4);
+              pixelsData[idx + indexX + indexY * imgWidth + 2] = ~~((pBlue + 3 * pixelsData[idx + indexX + indexY * imgWidth + 2]) / 4);
+
+              pixelsData[idx + indexX + indexY * imgWidth + 3] = 255;
+            }
+
+          }
+
+        }
+
+        from[i] = new Point(pX, pY, color, pRadius, from[i].id);
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      date = new Date();
+      var after = date.getTime();
+
+
+      if (processingPoints > 0)
+        requestAnimationFrame(update);
+      else {
+        morphing = false;
+      }
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    function draw () {
+      if (distribution == null) return;
+      for (var i = 0; i < length; i++) {
+        if (distribution.length == 0) return;
+        var id = distribution.length;
+        p = distribution[i];
+        ctx.fillStyle = "#" + ("000000" + p.color.toString(16)).substr(-6);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    function morph () {
+      if (morphing) return;
+      morphing = true;
+      var p;
+      if (to == undefined || to == distribution) {
+        from = [];
+        for (var i = 0; i < distribution.length; i++) {
+          p = distribution[i];
+          from.push(new Point(p.x, p.y, p.color, p.radius, p.id));
+        }
+        to = distribution2;
+      }
+      else {
+        from = [];
+        for (var i = 0; i < distribution2.length; i++) {
+          p = distribution2[i];
+          from.push(new Point(p.x, p.y, p.color, p.radius, p.id));
+        }
+        to = distribution;
+      }
+      ratio = 64;
+      processingPoints = Math.min(from.length, to.length);
+
+      update();
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    function drawCircles () {
+      var radius = increment;
+      var offset = 0;
+
+      maxRadius = ~~(maxRadius + 0.5) + 1;
+
+
+      document.body.appendChild(canvasCircles);
+      canvasCircles.width = maxRadius * 2 * maxRadius / increment;
+      canvasCircles.height = maxRadius * 2;
+      var ctxCircles = canvasCircles.getContext("2d");
+
+      ctxCircles.fillStyle = "#ffffff";
+      ctxCircles.fillRect(0, 0, canvasCircles.width, canvasCircles.height);
+
+      ctxCircles.fillStyle = "#000000";
+      while (radius <= maxRadius) {
+        ctxCircles.beginPath();
+        ctxCircles.arc(offset + radius, radius, radius, 0, Math.PI * 2);
+        ctxCircles.fill();
+
+        offset += maxRadius * 2;
+        radius += increment;
+      }
+
+      circlesImgData = ctxCircles.getImageData(0, 0, canvasCircles.width, canvasCircles.height);
+      circlesData = circlesImgData.data;
+    }
+
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    var imgWidth = 640;
+    var imgHeight = 500;
+
+    var canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+    var w = canvas.width = imgWidth;
+    var h = canvas.height = imgHeight;
+    var ctx = canvas.getContext("2d");
+    ctx.globalAlpha = 1;
+
+    var clearRect = [];
+    for (var i = 0; i < w * h * 4; i++) {
+      clearRect[i] = 0xff;
+    }
+
+    var radius = 3;
+    var distribution;
+    var distribution2;
+    var length;
+    var from;
+    var to;
+    var processingPoints;
+    var ratio = 64;
+    var morphing = false;
+    var maxRadius = 0;
+    var minRadius = 100;
+    var increment = 0.005;
+
+    var canvasImg = document.createElement('canvas');
+    document.body.appendChild(canvasImg);
+    canvasImg.style.display = "none";
+    canvasImg.width = imgWidth;
+    canvasImg.height = imgHeight;
+    var ctxImg = canvasImg.getContext("2d");
+
+    var canvasCircles = document.createElement('canvas');
+    canvasCircles.style.display = "none";
+    var ctxCircles;
+    var circlesImgData;
+    var circlesData;
+
+
+    var imageObj = new Image();
+    imageObj.crossOrigin = "Anonymous";
+    var image2Obj = new Image();
+    image2Obj.crossOrigin = "Anonymous";
+    var imageData;
+
+
+    imageObj.onload = function () {
+      ctxImg.drawImage(imageObj, 0, 0);
+      imageData = ctxImg.getImageData(0, 0, imgWidth, imgHeight);
+      distribution = Poisson.distribute(12000, radius, imgWidth, imgHeight, imageData);
+      length = distribution.length;
+      draw();
+      image2Obj.src = './imgs/dalmatian.jpg';
+    };
+
+
+    image2Obj.onload = function () {
+      ctxImg.drawImage(image2Obj, 0, 0);
+      imageData = ctxImg.getImageData(0, 0, imgWidth, imgHeight);
+      distribution2 = Poisson.distribute(12000, radius, imgWidth, imgHeight, imageData);
+
+      drawCircles();
+      startBtn.style.display = "block";
+    };
+
+
+    imageObj.src = './imgs/dog.jpg';
+
+    var startBtn = document.getElementById("startMorphBtn");
+    startBtn.style.display = "none";
+    startBtn.addEventListener("click", function () {
+      morph();
+    });
+  </script>
+</body>
+
+</html>
